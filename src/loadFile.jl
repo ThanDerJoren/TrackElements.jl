@@ -5,7 +5,7 @@ function readPTFile(filePath::String)
     =#
     #= Annahme: Koordinaten in PT dateien haben immer einen Index. Das ist die erste Spalte, die ich mit select überspringe
     =#
-    columnNames = ["Index","yCoordinates", "xCoordinates", "zCoordinates"]
+    columnNames = [:Index, :yCoordinates, :xCoordinates, :zCoordinates]
     coordinates = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
     return coordinates
 end ##readPTFile

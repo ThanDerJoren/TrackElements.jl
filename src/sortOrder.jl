@@ -1,3 +1,4 @@
+include("math.jl")
 function sortByDistance!(coordinates::AbstractDataFrame, start::Integer) ## start soll 1 sein wenn nichts übergeben wird
     coordinates[!,:sortIndex] .= 0 ##kann man auch leere Spalten einfügen?
     coordinates[!,:isVisited] .= false ## mit .= werden alle Zeilen mit dem gleichen wert befüllt?
@@ -10,7 +11,7 @@ function sortByDistance!(coordinates::AbstractDataFrame, start::Integer) ## star
     for i in 2:size(coordinates,1) #mit 2 Anfange: 1. sortIndex stimmt sofort 2. Der Letzte Punkt hat keine "nextRowToVisit", darf den Prozess also nicht mehr durchlaufen
         for comparedRow in eachrow(coordinates) ## die Eigene Zeile muss ausgeschlossen werden!!
             if(!comparedRow[:isVisited]) ## bereits besuchte Koordinaten müssen nicht mehr verglichen werden
-                distance = abs(sqrt((currentRow[:xCoordinates]-comparedRow[:xCoordinates])^2+(currentRow[:yCoordinates]-comparedRow[:yCoordinates])^2))
+                distance = getEuclideanNormOf(currentRow[:xCoordinates]-comparedRow[:xCoordinates],currentRow[:yCoordinates]-comparedRow[:yCoordinates])
                 #= Man guckt sich für jede Koordinate jede andere (nicht besuchte) Koordinate an
                 ist es die Kürzeste distanz, wird sie als die Folgekoordinate abgespeichert
                 findet man danach einen kürzeren Abstand, wird alles mit der neuen Folgekoordinate überschrieben
@@ -26,8 +27,78 @@ function sortByDistance!(coordinates::AbstractDataFrame, start::Integer) ## star
         currentRow = nextRowToVisit
         shortestDistance = Inf ##für den nächsten durchlauf wieder reseten
     end ## for loop  
-    print(coordinates)
     sort!(coordinates, :sortIndex)
-    print("ab hier sortiert")
+    print(coordinates)
+    select!(coordinates, Not(:isVisited))
+    select!(coordinates, Not(:sortIndex)) ##wie schaffe ich das in einer Zeile?
     print(coordinates)
 end ##sortByDistance
+
+
+function sortByDistanceConsideringAngel!(coordinates::AbstractDataFrame, start::Integer)
+    #= FRAGE
+    Es kann passieren, dass ein Punkt (oder zwei) übersprungen werden, wenn der dahinter liegende Punkt
+    einen Flacheren Winkel hat. ist das Problematisch?
+    =#
+    coordinatesInOrder = DataFrame()
+    currentRow = DataFrame()
+    nextRowToVisit = DataFrame()
+    shortestDistance= Inf
+    nextPossibleCoordinates = DataFrame()
+    
+    ##Vorbereitung: befüllen und neue Spalte hiunzufügen, um mit nextPossibleCoordinates arbeiten zu können
+    for i in 1:3
+        push!(nextPossibleCoordinates, coordinates[1,:])
+    end##for i
+    nextPossibleCoordinates[!,:distance].= Inf
+
+    currentRow = coordinates[start, :]
+    push!(coordinatesInOrder, currentRow)
+    deleteat!(coordinates, rownumber(currentRow))
+    ## der erste Folgepunkt muss ohne Winkel ermittelt werden, da es noch keine Referenz gibt
+    for comparedRow in eachrow(coordinates)
+        lineBetweenCoordinates = getVectorFromTo(currentRow,comparedRow)
+        distance = getEuclideanNormOf(lineBetweenCoordinates[:xCoordinates],lineBetweenCoordinates[:yCoordinates])
+        if (distance<shortestDistance)
+            shortestDistance = distance
+            nextRowToVisit = comparedRow
+        end ## if    
+    end ##comparedRow
+    currentRow = nextRowToVisit
+    push!(coordinatesInOrder, currentRow)
+    deleteat!(coordinates, rownumber(currentRow))
+    
+    #=
+    hier werden jetzt zuerst die 3 nächsten Punkte ermittel. Dann ist der kleinste Winkel zwischen
+    Vektor: previous-current und Vektor: next-current entscheident
+    =#
+    while (!isempty(coordinates))
+        ## die 3 nächsten Punkte werden in nextPossibleCoordinates abgespeichert
+        for comparedRow in eachrow(coordinates)
+            lineBetweenCoordinates = getVectorFromTo(currentRow,comparedRow)
+            distance = getEuclideanNormOf(lineBetweenCoordinates[:xCoordinates],lineBetweenCoordinates[:yCoordinates])
+            if (distance<nextPossibleCoordinates[1,:distance])
+                nextPossibleCoordinates[1,1:3] = comparedRow
+                nextPossibleCoordinates[1,4] = distance
+                sort!(nextPossibleCoordinates, :distance, rev=true) ## die längste dinstanz ist in der ersten Zeile
+            end ## if
+        end ## for comapredRow
+        ## hier wird der Winkel zwischen dem referenzvektor und den 3 möglichen Folgenden koordinaten berechnet
+        nextPossibleCoordinates[!,:angel].=0
+
+        previousRow = coordinatesInOrder[size(coordinatesInOrder,1)-1,:] ## currentRow ist der letzte Eintrag in coordinatesInOrder -> previousRow im vorletzten
+        referenceVector = getVectorFromTo(previousRow,currentRow)
+        ## aus den beiden Ortsvektoren von current und next den Vektor zwischen current und next berechnen
+        for item in eachrow(nextPossibleCoordinates)
+            vectorToCompare = getVectorFromTo(currentRow,item)
+            item[:angel] = getAngelBetweenVectors(referenceVector,vectorToCompare)            
+        end ##for i
+        sort!(nextPossibleCoordinates, :angel)
+        
+        currentRow = first(nextPossibleCoordinates)
+        push!(coordinatesInOrder, currentRow)
+        deleteat!(coordinates, rownumber(currentRow))
+    end ## while
+    coordinates = coordinatesInOrder ## ACHTUNG: hier gehen punkte verloren, die in coordinates bleiben, 
+                                        ##da sie durch die Winkelberücksichtigung übersprungen werden 
+end ## sortByDistanceConsideringAngel

@@ -3,10 +3,13 @@ function readPTFile(filePath::String)
         schön wäre "comit" zu verstehen. Das scheint mir ein befehl zu sein mit dem man kommentare (also Strings) überspringt
         das wäre optimal. Was gibt es noch für lösungen?
     =#
-    #= Annahme: Koordinaten in PT dateien haben immer einen Index. Das ist die erste Spalte, die ich mit select überspringe
+    #= 
+        Annahme: Koordinaten in PT dateien haben immer einen Index. Das ist die erste Spalte, die ich mit select überspringe
+        Wichtig: die Spalten müssen immer gleich heißen, sonst funktionieren die math.jl funktionen nicht
     =#
-    columnNames = [:Index, :yCoordinates, :xCoordinates, :zCoordinates]
+    columnNames = [:Index, :xCoordinates, :yCoordinates, :zCoordinates] ##konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
     coordinates = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
+    print(coordinates)
     return coordinates
 end ##readPTFile
 

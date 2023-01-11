@@ -1,4 +1,4 @@
-include("math.jl")
+#include("math.jl")
 function sortByDistance!(coordinates::AbstractDataFrame, start::Integer) ## start soll 1 sein wenn nichts übergeben wird
     coordinates[!,:sortIndex] .= 0 ##kann man auch leere Spalten einfügen?
     coordinates[!,:isVisited] .= false ## mit .= werden alle Zeilen mit dem gleichen wert befüllt?
@@ -35,7 +35,7 @@ function sortByDistance!(coordinates::AbstractDataFrame, start::Integer) ## star
 end ##sortByDistance
 
 
-function sortByDistanceConsideringAngel!(coordinates::AbstractDataFrame, start::Integer)
+function sortByDistanceConsideringAngle!(coordinates::AbstractDataFrame, start::Integer)
     #= FRAGE
     Es kann passieren, dass ein Punkt (oder zwei) übersprungen werden, wenn der dahinter liegende Punkt
     einen Flacheren Winkel hat. ist das Problematisch?
@@ -68,6 +68,7 @@ function sortByDistanceConsideringAngel!(coordinates::AbstractDataFrame, start::
     push!(coordinatesInOrder, currentRow)
     deleteat!(coordinates, rownumber(currentRow))
     
+    
     #=
     hier werden jetzt zuerst die 3 nächsten Punkte ermittel. Dann ist der kleinste Winkel zwischen
     Vektor: previous-current und Vektor: next-current entscheident
@@ -84,21 +85,23 @@ function sortByDistanceConsideringAngel!(coordinates::AbstractDataFrame, start::
             end ## if
         end ## for comapredRow
         ## hier wird der Winkel zwischen dem referenzvektor und den 3 möglichen Folgenden koordinaten berechnet
-        nextPossibleCoordinates[!,:angel].=0
+        nextPossibleCoordinates[!,:angel].=0.0
 
         previousRow = coordinatesInOrder[size(coordinatesInOrder,1)-1,:] ## currentRow ist der letzte Eintrag in coordinatesInOrder -> previousRow im vorletzten
         referenceVector = getVectorFromTo(previousRow,currentRow)
         ## aus den beiden Ortsvektoren von current und next den Vektor zwischen current und next berechnen
         for item in eachrow(nextPossibleCoordinates)
             vectorToCompare = getVectorFromTo(currentRow,item)
-            item[:angel] = getAngelBetweenVectors(referenceVector,vectorToCompare)            
+            item[:angel] = getAngleBetweenVectors(referenceVector,vectorToCompare)            
         end ##for i
         sort!(nextPossibleCoordinates, :angel)
         
         currentRow = first(nextPossibleCoordinates)
         push!(coordinatesInOrder, currentRow)
         deleteat!(coordinates, rownumber(currentRow))
+
+        nextPossibleCoordinates[:,:distance].= Inf ## durch den : wird die bereits bestehende spalte distance geändert
     end ## while
     coordinates = coordinatesInOrder ## ACHTUNG: hier gehen punkte verloren, die in coordinates bleiben, 
                                         ##da sie durch die Winkelberücksichtigung übersprungen werden 
-end ## sortByDistanceConsideringAngel
+end ## sortByDistanceConsideringAngle

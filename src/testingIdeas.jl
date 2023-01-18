@@ -1,6 +1,14 @@
-using CSV
-using DataFrames
-columnNames = ["Index", "yCoordinates", "xCoordinates", "zCoordinates"]
-CSV.read("C:/Users/Julek/Nextcloud/A Verkehrsingenieurwesen/ifev/ProgrammRadienBestimmen/Streckenachse freihand erfasst (aus ProVI).PT", DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true)
+df = DataFrame(xCoordinates= 1:2, yCoordinates= 1:2, zCoordinates= 1:2 )
+vectorA = df[1,:]
+vectorB = df[2,:]
 
-##C:/Users/Julek/Nextcloud/A Verkehrsingenieurwesen/ifev/ProgrammRadienBestimmen/Streckenachse freihand erfasst (aus ProVI).PT
+getVectorFromTo(vectorA, vectorB)
+
+using DataFrames
+df = DataFrame(A=1:4)
+println(df)
+oneRow = df[3,:]
+println(oneRow)
+deleteat!(df,2)
+println(oneRow)
+

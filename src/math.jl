@@ -3,6 +3,8 @@ euclideanNorm funktioniert nur im zweidimensionalen
 angelBetweenVectors gibt eine Gradzahl zurück
 =#
 function getVectorFromTo(start::DataFrames.DataFrameRow, ending::DataFrames.DataFrameRow) ##getVector From start To ending
+    ##man könnte die Methode noch so abändern, dass auch hier named Tuple übergeben werden müssen
+    println("in math.jl:", rownumber(ending))
     vector =(
         xCoordinates = ending[:xCoordinates]-start[:xCoordinates],
         yCoordinates = ending[:yCoordinates]-start[:yCoordinates],

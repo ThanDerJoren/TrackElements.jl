@@ -51,6 +51,8 @@ function sortByDistanceConsideringAngle!(coordinates::AbstractDataFrame, start::
         push!(nextPossibleCoordinates, coordinates[1,:])
     end##for i
     nextPossibleCoordinates[!,:distance].= Inf
+    nextPossibleCoordinates[!,:angle].=0.0
+    nextPossibleCoordinates[!,:rownumberInCoordinates].=0
 
     currentRow = coordinates[start, :]
     push!(coordinatesInOrder, currentRow)
@@ -76,31 +78,37 @@ function sortByDistanceConsideringAngle!(coordinates::AbstractDataFrame, start::
     while (!isempty(coordinates))
         ## die 3 nächsten Punkte werden in nextPossibleCoordinates abgespeichert
         for comparedRow in eachrow(coordinates)
+            println("RowsInCoordinates: ", size(coordinates,1))
+            println("currentRow: ",rownumber(currentRow))
+            println("comparedRow ",rownumber(comparedRow))
             lineBetweenCoordinates = getVectorFromTo(currentRow,comparedRow)
             distance = getEuclideanNormOf(lineBetweenCoordinates[:xCoordinates],lineBetweenCoordinates[:yCoordinates])
             if (distance<nextPossibleCoordinates[1,:distance])
-                nextPossibleCoordinates[1,1:3] = comparedRow
-                nextPossibleCoordinates[1,4] = distance
+                nextPossibleCoordinates[1,1:3] = comparedRow ##hier wird die längste distance, mit einer kürzeren Distanz überschrieben
+                nextPossibleCoordinates[1,:distance] = distance ##vorher stand hier statt :distance eine 4, sollte aber keinen unterschied machen
+                nextPossibleCoordinates[1,:rownumberInCoordinates] = rownumber(comparedRow)
                 sort!(nextPossibleCoordinates, :distance, rev=true) ## die längste dinstanz ist in der ersten Zeile
             end ## if
         end ## for comapredRow
+        println("----")
         ## hier wird der Winkel zwischen dem referenzvektor und den 3 möglichen Folgenden koordinaten berechnet
-        nextPossibleCoordinates[!,:angel].=0.0
+        #nextPossibleCoordinates[:,:angle].=0.0 das mache ich jetzt in Zeile 54
 
         previousRow = coordinatesInOrder[size(coordinatesInOrder,1)-1,:] ## currentRow ist der letzte Eintrag in coordinatesInOrder -> previousRow im vorletzten
         referenceVector = getVectorFromTo(previousRow,currentRow)
         ## aus den beiden Ortsvektoren von current und next den Vektor zwischen current und next berechnen
         for item in eachrow(nextPossibleCoordinates)
             vectorToCompare = getVectorFromTo(currentRow,item)
-            item[:angel] = getAngleBetweenVectors(referenceVector,vectorToCompare)            
+            item[:angle] = getAngleBetweenVectors(referenceVector,vectorToCompare)            
         end ##for i
-        sort!(nextPossibleCoordinates, :angel)
+        sort!(nextPossibleCoordinates, :angle)
         
-        currentRow = first(nextPossibleCoordinates)
+        currentRow = coordinates[first(nextPossibleCoordinates)[:rownumberInCoordinates], :]
         push!(coordinatesInOrder, currentRow)
         deleteat!(coordinates, rownumber(currentRow))
 
         nextPossibleCoordinates[:,:distance].= Inf ## durch den : wird die bereits bestehende spalte distance geändert
+        println("----------")
     end ## while
     coordinates = coordinatesInOrder ## ACHTUNG: hier gehen punkte verloren, die in coordinates bleiben, 
                                         ##da sie durch die Winkelberücksichtigung übersprungen werden 

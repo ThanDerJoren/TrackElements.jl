@@ -78,9 +78,6 @@ function sortByDistanceConsideringAngle!(coordinates::AbstractDataFrame, start::
     while (!isempty(coordinates))
         ## die 3 nächsten Punkte werden in nextPossibleCoordinates abgespeichert
         for comparedRow in eachrow(coordinates)
-            println("RowsInCoordinates: ", size(coordinates,1))
-            println("currentRow: ",rownumber(currentRow))
-            println("comparedRow ",rownumber(comparedRow))
             lineBetweenCoordinates = getVectorFromTo(currentRow,comparedRow)
             distance = getEuclideanNormOf(lineBetweenCoordinates[:xCoordinates],lineBetweenCoordinates[:yCoordinates])
             if (distance<nextPossibleCoordinates[1,:distance])
@@ -90,7 +87,6 @@ function sortByDistanceConsideringAngle!(coordinates::AbstractDataFrame, start::
                 sort!(nextPossibleCoordinates, :distance, rev=true) ## die längste dinstanz ist in der ersten Zeile
             end ## if
         end ## for comapredRow
-        println("----")
         ## hier wird der Winkel zwischen dem referenzvektor und den 3 möglichen Folgenden koordinaten berechnet
         #nextPossibleCoordinates[:,:angle].=0.0 das mache ich jetzt in Zeile 54
 
@@ -108,7 +104,6 @@ function sortByDistanceConsideringAngle!(coordinates::AbstractDataFrame, start::
         deleteat!(coordinates, rownumber(currentRow))
 
         nextPossibleCoordinates[:,:distance].= Inf ## durch den : wird die bereits bestehende spalte distance geändert
-        println("----------")
     end ## while
     coordinates = coordinatesInOrder ## ACHTUNG: hier gehen punkte verloren, die in coordinates bleiben, 
                                         ##da sie durch die Winkelberücksichtigung übersprungen werden 

@@ -30,7 +30,6 @@ function getAngleBetweenVectors(vectorA::NamedTuple, vectorB::NamedTuple)
 end ##getAngelBetweenVectors
 
 function getRadiusOfThreePoints(point1::DataFrames.DataFrameRow, point2::DataFrames.DataFrameRow, point3::DataFrames.DataFrameRow)
-    ## hier müssen noch 
     z1 = point1[:xCoordinates] + point1[:yCoordinates]im
     z2 = point2[:xCoordinates] + point2[:yCoordinates]im
     z3 = point3[:xCoordinates] + point3[:yCoordinates]im

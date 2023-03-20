@@ -9,7 +9,7 @@ function readPTFile(filePath::String)
     =#
     columnNames = [:Index, :xCoordinates, :yCoordinates, :zCoordinates] ##konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
     coordinates = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
-    print(coordinates)
+    #print(coordinates)
     return coordinates
 end ##readPTFile
 

@@ -1,6 +1,7 @@
 module TrackElements
 using CSV, DataFrames
 using Plots, StatsPlots
+using LinearAlgebra #wird für die Regression bei Radiusberechnung benötigt
 
 #=Ich arbeite in normalem Koordinatensystem, 
 nicht im Geodäten koordinatensystem
@@ -22,7 +23,8 @@ function TrackElement()
     sortByDistance!(coordinates, 55)
     plot2D(coordinates)
     calculateAverageOfDifferentCentralRadii!(coordinates, trackProperties)
-    calculateAverageOfLeftsideCentralRightsideRadii!(coordinates,trackProperties)
+    calculateAverageOfLeftsideCentralRightsideRadii!(coordinates, trackProperties)
+    calculateRadiusWithLeastSquareFittingOfCircles!(coordinates, trackProperties)
     print(trackProperties)
     #exportCoordinatesAndTrackPropertiesInCSV(coordinates, trackProperties)
 

@@ -28,7 +28,7 @@ function sortByDistance!(coordinates::AbstractDataFrame, start::Integer) ## star
         shortestDistance = Inf ##für den nächsten durchlauf wieder reseten
     end ## for loop  
     sort!(coordinates, :sortIndex)
-    print(coordinates)
+    #print(coordinates)
     select!(coordinates, Not(:isVisited))
     select!(coordinates, Not(:sortIndex)) ##wie schaffe ich das in einer Zeile?
     print(coordinates)

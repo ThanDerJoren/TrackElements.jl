@@ -49,8 +49,15 @@ function calculateAverageOfLeftsideCentralRightsideRadii!(coordinates::AbstractD
 end## calculateAverageOfLeftsideCenterRightsideRadii
 
 function calculateRadiusWithLeastSquareFittingOfCircles!(coordinates::AbstractDataFrame, trackProperties::AbstractDataFrame)
-    RadiusThroughRegression = fill(0.0, size(coordinates,1))
-    limit = 3
-    for center in oneSideImpact+1:size(coordinates,1)-oneSideImpact
+    radiusThroughRegression = fill(0.0, size(coordinates,1))
+    limit = 6
+    for center in limit+1:size(coordinates,1)-limit
         A = [coordinates[center-limit:center+limit,:xCoordinates] coordinates[center-limit:center+limit,:yCoordinates] fill(1, limit*2+1)]
+        B = [(coordinates[center-limit:center+limit,:xCoordinates]).^2+(coordinates[center-limit:center+limit,:yCoordinates]).^2] ## hier ist dim(B) = (1,1)
+        B = B[1] ## vorher liegt der gesamte vektor in einem Eintrag, dem ersten. Jetz ist dim(B)=(7,1)
+        x = pinv(A)*B
+        radiusThroughRegression[center] = sqrt(4*(x[3])^2+x[1]^2+x[2]^2)/2
+    end ## for center
+    trackProperties[!, :radiusThroughRegression] = radiusThroughRegression
+end##calculateRadiusWithLeastSquareFittingOfCircles
         

@@ -23,7 +23,7 @@ function calculateAverageOfDifferentCentralRadii!(coordinates::AbstractDataFrame
             radiusAverage = radiusAverage+getRadiusOfThreePoints(coordinates[center-i,:], coordinates[center,:], coordinates[center+i,:])
         end ## for i
         radiusAverage = radiusAverage/radiiPerCoordinate
-        centralRadiiAverage[center] = radiusAverage
+        centralRadiiAverage[center] = round(radiusAverage) ##ACHTUNG hier wird gerundet
     end ##for center
     trackProperties[!, :centralRadiiAverage] = centralRadiiAverage
 end ##calculateAverageRadiiOfDifferentCentralRadii
@@ -43,12 +43,16 @@ function calculateAverageOfLeftsideCentralRightsideRadii!(coordinates::AbstractD
         centralRadius = getRadiusOfThreePoints(coordinates[center-1,:], coordinates[center,:], coordinates[center+1,:])
         rightsideRadius = getRadiusOfThreePoints(coordinates[center,:], coordinates[center+1,:], coordinates[center+2,:])
         radiusAverage = (leftsideRadius+centralRadius+rightsideRadius)/3
-        leftCentralRightRadiiAverage[center] = radiusAverage
+        leftCentralRightRadiiAverage[center] = round(radiusAverage) ##ACHTUNG hier wird gerundet
     end ## for center
     trackProperties[!, :leftCentralRightRadiiAverage] = leftCentralRightRadiiAverage
 end## calculateAverageOfLeftsideCenterRightsideRadii
 
 function calculateRadiusWithLeastSquareFittingOfCircles!(coordinates::AbstractDataFrame, trackProperties::AbstractDataFrame)
+    #=hier soll der Radius durch eine Regression anngenähert werden.
+    Dafür gibt es wieder eine Zentrale Koordinate. Mit dem parameter limit kann geregelt werden, wie viele Koordinaten je links und rechts vom Zentrum mit in die Regression mit einfließen soll.
+    ACHTUNG: Die berechneten Radien sind komplett unrealistisch!!
+    =#
     radiusThroughRegression = fill(0.0, size(coordinates,1))
     limit = 6
     for center in limit+1:size(coordinates,1)-limit
@@ -56,7 +60,7 @@ function calculateRadiusWithLeastSquareFittingOfCircles!(coordinates::AbstractDa
         B = [(coordinates[center-limit:center+limit,:xCoordinates]).^2+(coordinates[center-limit:center+limit,:yCoordinates]).^2] ## hier ist dim(B) = (1,1)
         B = B[1] ## vorher liegt der gesamte vektor in einem Eintrag, dem ersten. Jetz ist dim(B)=(7,1)
         x = pinv(A)*B
-        radiusThroughRegression[center] = sqrt(4*(x[3])^2+x[1]^2+x[2]^2)/2
+        radiusThroughRegression[center] = round(sqrt(4*(x[3])^2+x[1]^2+x[2]^2)/2) ## ACHTUNG hier wird gerundet
     end ## for center
     trackProperties[!, :radiusThroughRegression] = radiusThroughRegression
 end##calculateRadiusWithLeastSquareFittingOfCircles

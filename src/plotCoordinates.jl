@@ -1,17 +1,17 @@
 # function plot2D(coordinates::DataFrame)
-#     @df coordinates display(scatter(:xCoordinates, :yCoordinates, markercolor = :grey, linecolor = :grey))
-#     @df coordinates display(plot!(:xCoordinates, :yCoordinates, linecolor = :grey))
-#     #display(annotate!([coordinates[1,:xCoordinates], coordinates[size(coordinates,1),:xCoordinates]], [coordinates[1,:yCoordinates], coordinates[size(coordinates,1),:yCoordinates]], [1:size(coordinates,1)]))
+#     @df coordinates display(scatter(:x, :y, markercolor = :grey, linecolor = :grey))
+#     @df coordinates display(plot!(:x, :y, linecolor = :grey))
+#     #display(annotate!([coordinates[1,:x], coordinates[size(coordinates,1),:x]], [coordinates[1,:y], coordinates[size(coordinates,1),:y]], [1:size(coordinates,1)]))
 #     for item in eachrow(coordinates)
-#         display(annotate!(item[:xCoordinates], item[:yCoordinates], (rownumber(item),7, :red, :right)))
+#         display(annotate!(item[:x], item[:y], (rownumber(item),7, :red, :right)))
 #     end ## for loop
-# end ##plotXYCoordinates
+# end ##plotXy
 
 function plotTrackWithOuterCoordinates(coordinates::AbstractDataFrame, outerCoordinates::AbstractDataFrame)
-    x = coordinates[:,:xCoordinates]
-    y = coordinates[:,:yCoordinates]
-    xOC = outerCoordinates[:, :xCoordinates]
-    yOC = outerCoordinates[:, :yCoordinates]
+    x = coordinates[:,:x]
+    y = coordinates[:,:y]
+    xOC = outerCoordinates[:, :x]
+    yOC = outerCoordinates[:, :y]
 
     f= Figure()
     Axis(f[1,1])
@@ -29,8 +29,8 @@ end##plotWithMakie
 
 function plotTrack(coordinates::AbstractDataFrame)
     colors = [repeat([:black, :blue], floor(Int,size(coordinates,1)/2)); repeat([:black], size(coordinates,1)%2)]## das Semikolon ist wichtig
-    x = coordinates[:,:xCoordinates]
-    y = coordinates[:,:yCoordinates]
+    x = coordinates[:,:x]
+    y = coordinates[:,:y]
     
     f= Figure()
     Axis(f[1,1])

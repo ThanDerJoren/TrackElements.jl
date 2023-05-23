@@ -7,13 +7,21 @@ function readPTFile(filePath::String)
         Annahme: Koordinaten in PT dateien haben immer einen Index. Das ist die erste Spalte, die ich mit select überspringe
         Wichtig: die Spalten müssen immer gleich heißen, sonst funktionieren die math.jl funktionen nicht
     =#
-    columnNames = [:Index, :xCoordinates, :yCoordinates, :zCoordinates] ##konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
+    columnNames = [:Index, :x, :y, :z] ##konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
     coordinates = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
     #print(coordinates)
     return coordinates
 end ##readPTFile
 
 function loadFile(filePath::String, fileType::String)
+    #filePath = communicationViaTerminal("Bitte den Dateipfad einfügen")
+    
+    #Warum Funktioniert das nicht?
+
+    # filePath = raw"test/data/StreckenachseFreihandErfasst(ausProVI).PT" ##raw macht aus \ die benötigten /
+
+    ##testDocument = raw"C:\Users\Julek\Nextcloud\A Verkehrsingenieurwesen\ifev\ProgrammRadienBestimmen\Streckenachse freihand erfasst (aus ProVI).PT" 
+    
     coordinates = DataFrame()
     if (filePath!=empty && fileType!=empty)
         if (fileType == ".PT") coordinates = readPTFile(filePath)

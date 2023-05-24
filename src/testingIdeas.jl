@@ -27,6 +27,9 @@
 ##PROBLEM: bei der write methode werden die " des Strings mit ausgegeben
 using DataFrames, CSV
 df = DataFrame(X=0.5:0.5:5, Y=0.25:0.25:2.5)
+for row in axes(df,1)
+    print(row)
+end
 # dfForPT = DataFrame(
 #     PPPP = String[],
 #     XXXX = String[],
@@ -58,7 +61,7 @@ function main()
     
     # Calling rdeadline() function
     name = readline()
-   
+    print(name)
 
 end
 function test(datentyp::String)

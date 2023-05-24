@@ -8,12 +8,12 @@ function readPTFile(filePath::String)
         Wichtig: die Spalten müssen immer gleich heißen, sonst funktionieren die math.jl funktionen nicht
     =#
     columnNames = [:Index, :x, :y, :z] ##konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
-    coordinates = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
-    #print(coordinates)
-    return coordinates
+    trackProperties = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
+    #print(trackProperties)
+    return trackProperties
 end ##readPTFile
 
-function loadFile(filePath::String, fileType::String)
+function loadCoordinates(filePath::String, fileType::String)
     #filePath = communicationViaTerminal("Bitte den Dateipfad einfügen")
     
     #Warum Funktioniert das nicht?
@@ -22,14 +22,14 @@ function loadFile(filePath::String, fileType::String)
 
     ##testDocument = raw"C:\Users\Julek\Nextcloud\A Verkehrsingenieurwesen\ifev\ProgrammRadienBestimmen\Streckenachse freihand erfasst (aus ProVI).PT" 
     
-    coordinates = DataFrame()
+    trackProperties = DataFrame()
     if (filePath!=empty && fileType!=empty)
-        if (fileType == ".PT") coordinates = readPTFile(filePath)
-        elseif (fileType == ".pt") coordinates = readPTFile(filePath)
+        if (fileType == ".PT") trackProperties = readPTFile(filePath)
+        elseif (fileType == ".pt") trackProperties = readPTFile(filePath)
         elseif (filetype == ".csv") println("csv dateien einzulesen ist noch nicht programmiert")
         else println("der fileType muss als string mit . und dem Dateitypen angegeben werden z.B: .PT")
         end ## if cases
     else println("Es muss ein Dateipfad und der Datentyp übergeben werden")
     end ##if   
-    return coordinates 
-end ##loadFile
+    return trackProperties 
+end ##loadCoordinates

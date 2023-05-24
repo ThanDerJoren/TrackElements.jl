@@ -12,7 +12,7 @@ function getVectorFromTo(start::DataFrames.DataFrameRow, ending::DataFrames.Data
     return vector ##Datentyp: NamedTuple
 end ## getVectorFromTo
 
-function getEuclideanNormOf(xValue::Float64, yValue::Float64 ) ## Woher weiß ich welchen Datentyp meine WErte in Coordinates haben?
+function getEuclideanNormOf(xValue::Float64, yValue::Float64 ) ## Woher weiß ich welchen Datentyp meine WErte in trackProperties haben?
     length = sqrt((xValue^2)+(yValue^2))
     return length
 end ##getEuclideanNorm

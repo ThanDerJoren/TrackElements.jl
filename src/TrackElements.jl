@@ -5,35 +5,36 @@ using CairoMakie
 using LinearAlgebra #wird für die Regression bei Radiusberechnung benötigt
 using Printf
 
+export TrackElement ##sonst würde er nach using TrackElements nur TrackElements.TrackElement kennen. Durch das export ändert sich das
+
 #=Ich arbeite in normalem Koordinatensystem, 
 nicht im Geodäten koordinatensystem
 =#
 include("math.jl")
-include("loadFile.jl")
-include("plotCoordinates.jl")
+include("import.jl")
+include("plot.jl")
 include("sortOrder.jl")
-include("calculateTrackProperties.jl")
+include("calculateRadii.jl")
 include("export.jl")
 function TrackElement()
-    coordinates = DataFrame()
-    trackProperties = DataFrame() ##wird von Funktionen in calculateTrackProperties mit werten befüllt
-    outerCoordinates = DataFrame() ## enthält 4 Koordinaten: nördlichste, sündlichste, westlichste und östlichste
+    trackProperties = DataFrame()
+    outertrackProperties = DataFrame() ## enthält 4 Koordinaten: nördlichste, sündlichste, westlichste und östlichste
     firstCoordinate = NamedTuple()
 
     filePath = raw"test/data/StreckenachseFreihandErfasst(ausProVI).PT" ##raw macht aus \ die benötigten /
-    coordinates = loadFile(filePath, ".PT")
+    trackProperties = loadCoordinates(filePath, ".PT")
     # coord = loadCoord(file, type = :PT)
-    plotTrack(coordinates)
-    firstCoordinate = findFirstCoordinate(coordinates)
-    sortByDistance!(coordinates, firstCoordinate)
-    plotTrack(coordinates)
-    calculateAverageOfDifferentCentralRadii!(coordinates, trackProperties)
-    calculateAverageOfLeftsideCentralRightsideRadii!(coordinates, trackProperties)
-    calculateRadiusWithLeastSquareFittingOfCircles!(coordinates, trackProperties)
+    plotTrack(trackProperties)
+    firstCoordinate = findFirstCoordinate(trackProperties)
+    sortByDistance!(trackProperties, firstCoordinate)
+    plotTrack(trackProperties)
+    calculateAverageOfDifferentCentralRadii!(trackProperties)
+    calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
+    calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties)
     print(trackProperties)
-    createPtFileWithRadiiInHighColumn(coordinates,trackProperties[:, :centralRadiiAverage])
+    createPtFileWithRadiiInHighColumn(trackProperties, :centralRadiiAverage)
     #CSV.write("TrackProperties.csv", trackProperties)
-    #exportCoordinatesAndTrackPropertiesInCSV(coordinates, trackProperties)
+    #exporttrackPropertiesAndTrackPropertiesInCSV(trackProperties, trackProperties)
 
 end ##TrackElement
 

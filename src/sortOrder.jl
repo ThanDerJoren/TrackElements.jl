@@ -1,31 +1,31 @@
 #include("math.jl")
-function getOuterCoordinates(coordinates::AbstractDataFrame, outerCoordinates::AbstractDataFrame)
+function getOutertrackProperties(trackProperties::AbstractDataFrame, outertrackProperties::AbstractDataFrame)
     # darüber begin finden macht leider doch keinen sinn
     # Es wird je die nördlichste, sündlichste, westlichste und östlichste Koordinate abgespeichert
-    sort!(coordinates, :y)
-    push!(outerCoordinates, first(coordinates))
-    push!(outerCoordinates, last(coordinates))
+    sort!(trackProperties, :y)
+    push!(outertrackProperties, first(trackProperties))
+    push!(outertrackProperties, last(trackProperties))
 
-    sort!(coordinates, :x)
-    push!(outerCoordinates, first(coordinates))
-    push!(outerCoordinates, last(coordinates))
-end##getOuterCoordinates    
+    sort!(trackProperties, :x)
+    push!(outertrackProperties, first(trackProperties))
+    push!(outertrackProperties, last(trackProperties))
+end##getOutertrackProperties    
 
-function findFirstCoordinate(coordinates::AbstractDataFrame)
-    coordinates[!, :distanceToNextCoordinate] .= 0.0
-    coordinates[!, :isVisited] .= false
+function findFirstCoordinate(trackProperties::AbstractDataFrame)
+    trackProperties[!, :distanceToNextCoordinate] .= 0.0
+    trackProperties[!, :isVisited] .= false
     currentRow = DataFrame()
     nextRowToVisit = DataFrame()
     shortestDistance = Inf
-    currentRow = coordinates[1,:]
+    currentRow = trackProperties[1,:]
     currentRow[:isVisited] = true
-    coordinateWithLargestDistance = coordinates[1,:]
+    coordinateWithLargestDistance = trackProperties[1,:]
     #firstCoordinate::NamedTuple ##kann man so eine Variable deklarieren?
-    for i in 1:size(coordinates,1) ##innerhalb dieser forschleife darf der DataFrame nicht neu sortiert werden
-        if(i==size(coordinates,1)) ##Schließt den Kreis distanz von der letzten Coordinate zur ersten Koordinate des Durchlaufs (Standardmäßig 1. Zeile). Deswegen nicht neu sortieren, sonst ist die Koordinate in der ersten Zeile eine andere.
-            currentRow[:distanceToNextCoordinate] = getEuclideanNormOf(currentRow[:x]-coordinates[1,:x], currentRow[:y]-coordinates[1,:y])
+    for i in 1:size(trackProperties,1) ##innerhalb dieser forschleife darf der DataFrame nicht neu sortiert werden
+        if(i==size(trackProperties,1)) ##Schließt den Kreis distanz von der letzten Coordinate zur ersten Koordinate des Durchlaufs (Standardmäßig 1. Zeile). Deswegen nicht neu sortieren, sonst ist die Koordinate in der ersten Zeile eine andere.
+            currentRow[:distanceToNextCoordinate] = getEuclideanNormOf(currentRow[:x]-trackProperties[1,:x], currentRow[:y]-trackProperties[1,:y])
         else
-            for comparedRow in eachrow(coordinates)
+            for comparedRow in eachrow(trackProperties)
                 if(!comparedRow[:isVisited])
                     distance = getEuclideanNormOf(currentRow[:x]-comparedRow[:x],currentRow[:y]-comparedRow[:y])
                     if(distance<shortestDistance)
@@ -40,7 +40,7 @@ function findFirstCoordinate(coordinates::AbstractDataFrame)
             currentRow = nextRowToVisit
         end##if
     end##for
-    for item in eachrow(coordinates)
+    for item in eachrow(trackProperties)
         if (item[:distanceToNextCoordinate]>coordinateWithLargestDistance[:distanceToNextCoordinate])
             coordinateWithLargestDistance = item
         end#if
@@ -51,14 +51,14 @@ end##findFirstCoordinate
 
 
 
-function sortByDistance!(coordinates::AbstractDataFrame, firstCoordinate::NamedTuple) ## start soll 1 sein wenn nichts übergeben wird
-    coordinates[!,:sortIndex] .= 0 ##kann man auch leere Spalten einfügen?
-    coordinates[!,:isVisited] .= false ## mit .= werden alle Zeilen mit dem gleichen wert befüllt?
+function sortByDistance!(trackProperties::AbstractDataFrame, firstCoordinate::NamedTuple) ## start soll 1 sein wenn nichts übergeben wird
+    trackProperties[!,:sortIndex] .= 0 ##kann man auch leere Spalten einfügen?
+    trackProperties[!,:isVisited] .= false ## mit .= werden alle Zeilen mit dem gleichen wert befüllt?
     currentRow = DataFrame() ##kann man definieren, dass es einfach nur ein DataFrameRow ist?
     nextRowToVisit = DataFrame()
     shortestDistance = Inf
     
-    for item in eachrow(coordinates) ##hier wird die firstCoordinate im Datensatz gesucht
+    for item in eachrow(trackProperties) ##hier wird die firstCoordinate im Datensatz gesucht
         if(item[:x]==firstCoordinate[:x] && item[:y]==firstCoordinate[:y] && item[:z]==firstCoordinate[:z])
             currentRow = item ## hier entsteht ein DataFrameRow
             currentRow[:isVisited] = true ##hier wird der Startpunkt konfiguriert
@@ -67,8 +67,8 @@ function sortByDistance!(coordinates::AbstractDataFrame, firstCoordinate::NamedT
         end##if
     end##for
 
-    for i in 2:size(coordinates,1) #mit 2 Anfange: 1. sortIndex stimmt sofort 2. Der Letzte Punkt hat keine "nextRowToVisit", darf den Prozess also nicht mehr durchlaufen
-        for comparedRow in eachrow(coordinates) ## die Eigene Zeile muss ausgeschlossen werden!!
+    for i in 2:size(trackProperties,1) #mit 2 Anfange: 1. sortIndex stimmt sofort 2. Der Letzte Punkt hat keine "nextRowToVisit", darf den Prozess also nicht mehr durchlaufen
+        for comparedRow in eachrow(trackProperties) ## die Eigene Zeile muss ausgeschlossen werden!!
             if(!comparedRow[:isVisited]) ## bereits besuchte Koordinaten müssen nicht mehr verglichen werden
                 distance = getEuclideanNormOf(currentRow[:x]-comparedRow[:x],currentRow[:y]-comparedRow[:y])
                 #= Man guckt sich für jede Koordinate jede andere (nicht besuchte) Koordinate an
@@ -86,91 +86,89 @@ function sortByDistance!(coordinates::AbstractDataFrame, firstCoordinate::NamedT
         currentRow = nextRowToVisit
         shortestDistance = Inf ##für den nächsten durchlauf wieder reseten
     end ## for loop  
-    sort!(coordinates, :sortIndex)
-    #print(coordinates)
-    select!(coordinates, Not(:isVisited))
-    select!(coordinates, Not(:sortIndex)) ##wie schaffe ich das in einer Zeile?
-    println(coordinates)
+    sort!(trackProperties, :sortIndex)
+    #print(trackProperties)
+    select!(trackProperties, Not(:isVisited))
+    select!(trackProperties, Not(:sortIndex)) ##wie schaffe ich das in einer Zeile?
+    println(trackProperties)
 end ##sortByDistance
 
-function findTrackBegin(coordinates::AbstractDataFrame)
-    
-end##findTrackBegin
 
 
 
 
 
-function sortByDistanceConsideringAngle!(coordinates::AbstractDataFrame, start::Integer)
+
+function sortByDistanceConsideringAngle!(trackProperties::AbstractDataFrame, start::Integer)
     #= FRAGE
     Es kann passieren, dass ein Punkt (oder zwei) übersprungen werden, wenn der dahinter liegende Punkt
     einen Flacheren Winkel hat. ist das Problematisch?
     =#
-    coordinatesInOrder = DataFrame()
+    trackPropertiesInOrder = DataFrame()
     currentRow = DataFrame()
     nextRowToVisit = DataFrame()
     shortestDistance= Inf
-    nextPossibleCoordinates = DataFrame()
+    nextPossibletrackProperties = DataFrame()
     
-    ##Vorbereitung: befüllen und neue Spalte hiunzufügen, um mit nextPossibleCoordinates arbeiten zu können
+    ##Vorbereitung: befüllen und neue Spalte hiunzufügen, um mit nextPossibletrackProperties arbeiten zu können
     for i in 1:3
-        push!(nextPossibleCoordinates, coordinates[1,:])
+        push!(nextPossibletrackProperties, trackProperties[1,:])
     end##for i
-    nextPossibleCoordinates[!,:distance].= Inf
-    nextPossibleCoordinates[!,:angle].=0.0
-    nextPossibleCoordinates[!,:rownumberInCoordinates].=0
+    nextPossibletrackProperties[!,:distance].= Inf
+    nextPossibletrackProperties[!,:angle].=0.0
+    nextPossibletrackProperties[!,:rownumberIntrackProperties].=0
 
-    currentRow = coordinates[start, :]
-    push!(coordinatesInOrder, currentRow)
-    deleteat!(coordinates, rownumber(currentRow))
+    currentRow = trackProperties[start, :]
+    push!(trackPropertiesInOrder, currentRow)
+    deleteat!(trackProperties, rownumber(currentRow))
     ## der erste Folgepunkt muss ohne Winkel ermittelt werden, da es noch keine Referenz gibt
-    for comparedRow in eachrow(coordinates)
-        lineBetweenCoordinates = getVectorFromTo(currentRow,comparedRow)
-        distance = getEuclideanNormOf(lineBetweenCoordinates[:x],lineBetweenCoordinates[:y])
+    for comparedRow in eachrow(trackProperties)
+        lineBetweentrackProperties = getVectorFromTo(currentRow,comparedRow)
+        distance = getEuclideanNormOf(lineBetweentrackProperties[:x],lineBetweentrackProperties[:y])
         if (distance<shortestDistance)
             shortestDistance = distance
             nextRowToVisit = comparedRow
         end ## if    
     end ##comparedRow
     currentRow = nextRowToVisit
-    push!(coordinatesInOrder, currentRow)
-    deleteat!(coordinates, rownumber(currentRow))
+    push!(trackPropertiesInOrder, currentRow)
+    deleteat!(trackProperties, rownumber(currentRow))
     
     
     #=
     hier werden jetzt zuerst die 3 nächsten Punkte ermittel. Dann ist der kleinste Winkel zwischen
     Vektor: previous-current und Vektor: next-current entscheident
     =#
-    while (!isempty(coordinates))
-        ## die 3 nächsten Punkte werden in nextPossibleCoordinates abgespeichert
-        for comparedRow in eachrow(coordinates)
-            lineBetweenCoordinates = getVectorFromTo(currentRow,comparedRow)
-            distance = getEuclideanNormOf(lineBetweenCoordinates[:x],lineBetweenCoordinates[:y])
-            if (distance<nextPossibleCoordinates[1,:distance])
-                nextPossibleCoordinates[1,1:3] = comparedRow ##hier wird die längste distance, mit einer kürzeren Distanz überschrieben
-                nextPossibleCoordinates[1,:distance] = distance ##vorher stand hier statt :distance eine 4, sollte aber keinen unterschied machen
-                nextPossibleCoordinates[1,:rownumberInCoordinates] = rownumber(comparedRow)
-                sort!(nextPossibleCoordinates, :distance, rev=true) ## die längste dinstanz ist in der ersten Zeile
+    while (!isempty(trackProperties))
+        ## die 3 nächsten Punkte werden in nextPossibletrackProperties abgespeichert
+        for comparedRow in eachrow(trackProperties)
+            lineBetweentrackProperties = getVectorFromTo(currentRow,comparedRow)
+            distance = getEuclideanNormOf(lineBetweentrackProperties[:x],lineBetweentrackProperties[:y])
+            if (distance<nextPossibletrackProperties[1,:distance])
+                nextPossibletrackProperties[1,1:3] = comparedRow ##hier wird die längste distance, mit einer kürzeren Distanz überschrieben
+                nextPossibletrackProperties[1,:distance] = distance ##vorher stand hier statt :distance eine 4, sollte aber keinen unterschied machen
+                nextPossibletrackProperties[1,:rownumberIntrackProperties] = rownumber(comparedRow)
+                sort!(nextPossibletrackProperties, :distance, rev=true) ## die längste dinstanz ist in der ersten Zeile
             end ## if
         end ## for comapredRow
         ## hier wird der Winkel zwischen dem referenzvektor und den 3 möglichen Folgenden koordinaten berechnet
-        #nextPossibleCoordinates[:,:angle].=0.0 das mache ich jetzt in Zeile 54
+        #nextPossibletrackProperties[:,:angle].=0.0 das mache ich jetzt in Zeile 54
 
-        previousRow = coordinatesInOrder[size(coordinatesInOrder,1)-1,:] ## currentRow ist der letzte Eintrag in coordinatesInOrder -> previousRow im vorletzten
+        previousRow = trackPropertiesInOrder[size(trackPropertiesInOrder,1)-1,:] ## currentRow ist der letzte Eintrag in trackPropertiesInOrder -> previousRow im vorletzten
         referenceVector = getVectorFromTo(previousRow,currentRow)
         ## aus den beiden Ortsvektoren von current und next den Vektor zwischen current und next berechnen
-        for item in eachrow(nextPossibleCoordinates)
+        for item in eachrow(nextPossibletrackProperties)
             vectorToCompare = getVectorFromTo(currentRow,item)
             item[:angle] = getAngleBetweenVectors(referenceVector,vectorToCompare)            
         end ##for i
-        sort!(nextPossibleCoordinates, :angle)
+        sort!(nextPossibletrackProperties, :angle)
         
-        currentRow = coordinates[first(nextPossibleCoordinates)[:rownumberInCoordinates], :]
-        push!(coordinatesInOrder, currentRow)
-        deleteat!(coordinates, rownumber(currentRow))
+        currentRow = trackProperties[first(nextPossibletrackProperties)[:rownumberIntrackProperties], :]
+        push!(trackPropertiesInOrder, currentRow)
+        deleteat!(trackProperties, rownumber(currentRow))
 
-        nextPossibleCoordinates[:,:distance].= Inf ## durch den : wird die bereits bestehende spalte distance geändert
+        nextPossibletrackProperties[:,:distance].= Inf ## durch den : wird die bereits bestehende spalte distance geändert
     end ## while
-    coordinates = coordinatesInOrder ## ACHTUNG: hier gehen punkte verloren, die in coordinates bleiben, 
+    trackProperties = trackPropertiesInOrder ## ACHTUNG: hier gehen punkte verloren, die in trackProperties bleiben, 
                                         ##da sie durch die Winkelberücksichtigung übersprungen werden 
 end ## sortByDistanceConsideringAngle

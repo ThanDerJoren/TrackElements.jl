@@ -7,26 +7,26 @@ function readPTFile(filePath::String)
         Annahme: Koordinaten in PT dateien haben immer einen Index. Das ist die erste Spalte, die ich mit select überspringe
         Wichtig: die Spalten müssen immer gleich heißen, sonst funktionieren die math.jl funktionen nicht
     =#
-    columnNames = [:Index, :x, :y, :z] ##konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
+    columnNames = [:ID, :x, :y, :z] ## Reihenfolge konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
     trackProperties = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
-    #print(trackProperties)
+    print(trackProperties)
     return trackProperties
 end ##readPTFile
 
-function loadCoordinates(filePath::String, fileType::String)
-    #filePath = communicationViaTerminal("Bitte den Dateipfad einfügen")
-    
-    #Warum Funktioniert das nicht?
+function readCSVFile(filePath::String)
+    columnNames = [:ID, :x, :y, :z]
+    trackProperties = CSV.read(filePath, DataFrame, header = columnNames,skipto = 2, select = [1,2,3,4])
+    #print(trackProperties)
+    return trackProperties
+end##readCSVFile
 
-    # filePath = raw"test/data/StreckenachseFreihandErfasst(ausProVI).PT" ##raw macht aus \ die benötigten /
-
-    ##testDocument = raw"C:\Users\Julek\Nextcloud\A Verkehrsingenieurwesen\ifev\ProgrammRadienBestimmen\Streckenachse freihand erfasst (aus ProVI).PT" 
-    
+function loadNodes(filePath::String, fileType::String)
+   
     trackProperties = DataFrame()
     if (filePath!=empty && fileType!=empty)
+        uppercase(fileType)
         if (fileType == ".PT") trackProperties = readPTFile(filePath)
-        elseif (fileType == ".pt") trackProperties = readPTFile(filePath)
-        elseif (filetype == ".csv") println("csv dateien einzulesen ist noch nicht programmiert")
+        elseif (fileType == ".CSV") trackProperties = readCSVFile(filePath)
         else println("der fileType muss als string mit . und dem Dateitypen angegeben werden z.B: .PT")
         end ## if cases
     else println("Es muss ein Dateipfad und der Datentyp übergeben werden")

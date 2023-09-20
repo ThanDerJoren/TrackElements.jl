@@ -131,7 +131,7 @@ function filterAllNodesByDataFromFilteredWayArray(filteredWayArray::Any) ##TODO
     for way in filteredWayArray
         nodes = way.containedNodeIDs
         for node in nodes
-            if !node.issignal
+            if !node.issignal ## exclude signals. Because they aren't on the track, but next to it
                 addToFilteredNodeArray(node)
             end##if
         end
@@ -410,7 +410,7 @@ end
 # After the download the function reads the Buffer.osm-file with the data and imports them.
 # With these data the function calls the createWays/createNodes-functions and filters the NamedTuples with the filter***-functions.
 # 
-function extractTrackNodes(relationID::Int) ##vormals addRelation
+function extractTrackNodes(elementID::Int, element::String) ##vormals addRelation
     xdoc = parse_file("./Buffer.osm")
     xroot = root(xdoc)
     clearAllArrays()
@@ -418,7 +418,12 @@ function extractTrackNodes(relationID::Int) ##vormals addRelation
     createWays(xroot)
     println(length(nodeArray)," Nodes in nodeArray")
     println(length(wayArray)," Ways in wayArray")
-    filterAllWaysByDataFromRelation(relationID,xroot)
+    if element == "relation"
+        filterAllWaysByDataFromRelation(elementID,xroot)
+    elseif element == "way"
+        filterWayToFilteredWayArray(elementID)
+    else print("element has to be either 'relation' or 'way'.")
+    end##if
     filterAllNodesByDataFromFilteredWayArray(filteredWayArray)
     println(length(filteredWayArray)," Ways in filteredWayArray")
     println(length(filteredNodeArray)," Nodes in filteredNodeArray")
@@ -439,7 +444,7 @@ function addWay(id::Int)
     createWays(xroot)
     println(length(nodeArray)," Nodes in nodeArray")
     println(length(wayArray)," Ways in wayArray")
-    filterWayToFilteredWayArray(id)
+    
     filterAllNodesByDataFromFilteredWayArray(filteredWayArray)
     println(length(filteredWayArray)," Ways in filteredWayArray")
     println(length(filteredNodeArray)," Nodes in filteredNodeArray")  

@@ -17,45 +17,46 @@ function getEuclideanNormOf(xValue::Number, yValue::Number ) ## Woher weiß ich 
     return length
 end ##getEuclideanNorm
 
-function getRadiusOfThreePoints(point1::DataFrames.DataFrameRow, point2::DataFrames.DataFrameRow, point3::DataFrames.DataFrameRow)
-    z1 = point1[:x] + point1[:y]im
-    z2 = point2[:x] + point2[:y]im
-    z3 = point3[:x] + point3[:y]im
+function getRadiusOfThreeNodes(node1::DataFrames.DataFrameRow, node2::DataFrames.DataFrameRow, node3::DataFrames.DataFrameRow)
+    z1 = node1[:x] + node1[:y]im
+    z2 = node2[:x] + node2[:y]im
+    z3 = node3[:x] + node3[:y]im
 
     w = (z3-z1)/(z2-z1)
     c = (z2-z1)*(w-abs2(w))/(w-conj(w))+z1
     r = abs(z1-c)
     return r
-end ## getRadiusOfThreePoints
+end ## getRadiusOfThreeNodes
 
-function setStraightLineRadiiToInfinity!(trackProperties::AbstractDataFrame)
+function setStraightLineRadiiToInfinity!(trackProperties::AbstractDataFrame, columnName::Symbol)
     ## 25000 ist der maximal verbaute Radius
     ## alles darüber kann als gerade angesehen werden -> sehr große radien
     for row in eachrow(trackProperties)
-        if row[:rightsideRadii] >50000
-            row[:rightsideRadii] = Inf
-        end
-        if row[:centralRadiiAverage] >50000
-            row[:centralRadiiAverage] = Inf
-        end
-        if row[:leftCentralRightRadiiAverage] >50000
-                row[:leftCentralRightRadiiAverage] = Inf
+        if row[columnName] >50000
+            row[columnName] = Inf
         end
     end
 end ## setStraightLineRadiiToInfinity
+
+
 ########################################################################
 ########################################################################
 
-function getOutertrackProperties(trackProperties::AbstractDataFrame, outertrackProperties::AbstractDataFrame)
+function getOutertrackProperties(trackProperties::AbstractDataFrame)
+    ## hier benötige ich explizit pass by value für trackProperties
     # darüber begin finden macht leider doch keinen sinn
     # Es wird je die nördlichste, sündlichste, westlichste und östlichste Koordinate abgespeichert
-    sort!(trackProperties, :y)
-    push!(outertrackProperties, first(trackProperties))
-    push!(outertrackProperties, last(trackProperties))
+    trackNodes = copy(trackProperties)
+    outerTrackNodes = DataFrame()
+    
+    sort!(trackNodes, :x)
+    push!(outerTrackNodes, first(trackNodes))
+    push!(outerTrackNodes, last(trackNodes))
 
-    sort!(trackProperties, :x)
-    push!(outertrackProperties, first(trackProperties))
-    push!(outertrackProperties, last(trackProperties))
+    sort!(trackNodes, :y)
+    push!(outerTrackNodes, first(trackNodes))
+    push!(outerTrackNodes, last(trackNodes))
+    return outerTrackNodes
 end##getOutertrackProperties    
 
 function findFirstNode(trackProperties::AbstractDataFrame)
@@ -147,12 +148,13 @@ end ##sortByDistance
 function calculateRightsideRadiiFromTrack!(trackProperties::AbstractDataFrame)
     rightsideRadii = fill(0.0, size(trackProperties,1)) ## es muss sichergestellt werden, dass alle Arrays, die trackProperties hinzugefügt werden sollen, die gleiche Länge haben
     for i in 1:size(trackProperties, 1)-2
-        rightsideRadii[i] = getRadiusOfThreePoints(trackProperties[i,:], trackProperties[i+1,:], trackProperties[i+2,:])
+        rightsideRadii[i] = getRadiusOfThreeNodes(trackProperties[i,:], trackProperties[i+1,:], trackProperties[i+2,:])
     end ##for
     trackProperties[!, :rightsideRadii] = rightsideRadii ## hier wird das vorher berechnete Array, dass genauso lang ist wie der Koordinaten DataFrame, als Spalte zu dem DataFrame trackProperties hinzugefügt.
 end ##calculateRadiiFromTrack
 
-function calculateAverageOfDifferentCentralRadii!(trackProperties::AbstractDataFrame)
+function calculateAverageOfDifferentCentralRadii!(trackProperties::AbstractDataFrame, radiiAmount::Int, columnName::Symbol)
+    ##radiiAmount: Aus wie vielen Radien der Mittelwert berechnet werden soll
     #= Es werden mehrere Radien aus 3 Koordinaten berechnet. Dabei bleibt eine Koordinate immer gleich(central).
     Es wird immer eine Koordinate rechts und eine links von der Zentralen Koordinate gewählt.
     Bei dem ersten radius werden die Koordinaten direkt je rechts und links von der Zentralen Koordinate gewählt.
@@ -162,16 +164,15 @@ function calculateAverageOfDifferentCentralRadii!(trackProperties::AbstractDataF
     Am Ende wird das arithmetische Mittel aus allen berechneten Radien gebildet.
     =#
     centralRadiiAverage = fill(0.0, size(trackProperties,1))
-    radiiPerCoordinate = 3 ##Aus wie vielen Radien der Mittelwert berechnet werden soll
-    for center in radiiPerCoordinate+1:size(trackProperties,1)-radiiPerCoordinate ## es werden z.B. 3 Radien gebildet, von der letzten zentralen Koordinate braucht man noch 3 Koordinaten zu jedem Rand
+    for center in radiiAmount+1:size(trackProperties,1)-radiiAmount ## es werden z.B. 3 Radien gebildet, von der letzten zentralen Koordinate braucht man noch 3 Koordinaten zu jedem Rand
         radiusAverage = 0
-        for i in 1:radiiPerCoordinate
-            radiusAverage = radiusAverage+getRadiusOfThreePoints(trackProperties[center-i,:], trackProperties[center,:], trackProperties[center+i,:])
+        for i in 1:radiiAmount
+            radiusAverage = radiusAverage+getRadiusOfThreeNodes(trackProperties[center-i,:], trackProperties[center,:], trackProperties[center+i,:])
         end ## for i
-        radiusAverage = radiusAverage/radiiPerCoordinate
+        radiusAverage = radiusAverage/radiiAmount
         centralRadiiAverage[center] = round(radiusAverage) ##ACHTUNG hier wird gerundet
     end ##for center
-    trackProperties[!, :centralRadiiAverage] = centralRadiiAverage
+    trackProperties[!, columnName] = centralRadiiAverage
 end ##calculateAverageRadiiOfDifferentCentralRadii
 
 function calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties::AbstractDataFrame)
@@ -185,9 +186,9 @@ function calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties::Abstr
     leftCentralRightRadiiAverage = fill(0.0, size(trackProperties,1))
     for center in 3:size(trackProperties,1)-2 ## Am Rand müssen neben dem letzten zu berechnenden center noch 2 Koordinaten verfügbar sein
         radiusAverage = 0
-        leftsideRadius = getRadiusOfThreePoints(trackProperties[center-2,:], trackProperties[center-1,:], trackProperties[center,:])
-        centralRadius = getRadiusOfThreePoints(trackProperties[center-1,:], trackProperties[center,:], trackProperties[center+1,:])
-        rightsideRadius = getRadiusOfThreePoints(trackProperties[center,:], trackProperties[center+1,:], trackProperties[center+2,:])
+        leftsideRadius = getRadiusOfThreeNodes(trackProperties[center-2,:], trackProperties[center-1,:], trackProperties[center,:])
+        centralRadius = getRadiusOfThreeNodes(trackProperties[center-1,:], trackProperties[center,:], trackProperties[center+1,:])
+        rightsideRadius = getRadiusOfThreeNodes(trackProperties[center,:], trackProperties[center+1,:], trackProperties[center+2,:])
         radiusAverage = (leftsideRadius+centralRadius+rightsideRadius)/3
         leftCentralRightRadiiAverage[center] = round(radiusAverage) ##ACHTUNG hier wird gerundet
     end ## for center

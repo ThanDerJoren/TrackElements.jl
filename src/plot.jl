@@ -30,21 +30,25 @@ function plotTrackWithOutertrackProperties(trackProperties::AbstractDataFrame, o
 end##plotWithMakie
 
 function plotTrack(trackProperties::AbstractDataFrame)
-    colors = [repeat([:black, :blue], floor(Int,size(trackProperties,1)/2)); repeat([:black], size(trackProperties,1)%2)]## das Semikolon ist wichtig
+    colors = [repeat([:green, :blue], floor(Int,size(trackProperties,1)/2)); repeat([:green], size(trackProperties,1)%2)]## das Semikolon ist wichtig
+
+    outerTrackNodes = getOutertrackProperties(trackProperties)
+    width = abs(outerTrackNodes[1, :x]- outerTrackNodes[2, :x])
+    height = abs(outerTrackNodes[3, :y]-outerTrackNodes[4, :y])
+    
     x = trackProperties[:,:x]
     y = trackProperties[:,:y]
 
-    f= Figure()
+    f= Figure(resolution = (width, height))
     Axis(f[1,1])
-    scatter!(x,y, color = colors, markersize = 5)
-    lines!(x,y, color = :grey, linewidth = 0.5)
+    lines!(x,y, color = :grey, linewidth = 10)
+    scatter!(x,y, color = colors, markersize = 15)
     text!(x,y, 
         text = string.(1:size(trackProperties,1)), 
-        color = :white,
-        fontsize =1,
+        color = :black,
+        fontsize =8,
         align = (:center, :bottom))
     display(f)
-    
     #save("TrackPlot.svg", f)
-
+    return f
 end##plotWithMakie

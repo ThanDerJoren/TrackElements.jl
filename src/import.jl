@@ -25,9 +25,9 @@ function loadNodes(filePath::String, fileType::String)
     trackProperties = DataFrame()
     if (filePath!=empty && fileType!=empty)
         uppercase(fileType)
-        if (fileType == ".PT") trackProperties = readPTFile(filePath)
-        elseif (fileType == ".CSV") trackProperties = readCSVFile(filePath)
-        else println("der fileType muss als string mit . und dem Dateitypen angegeben werden z.B: .PT")
+        if (fileType == "PT") trackProperties = readPTFile(filePath)
+        elseif (fileType == "CSV") trackProperties = readCSVFile(filePath)
+        else println("der fileType muss als string ohne '.' angegeben werden z.B: 'PT'")
         end ## if cases
     else println("Es muss ein Dateipfad und der Datentyp übergeben werden")
     end ##if   

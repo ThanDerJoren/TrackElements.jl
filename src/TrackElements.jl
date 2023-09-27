@@ -8,12 +8,14 @@ using Dates                                                    ## TrackElements
 #=
 EXPLANATION of some Packages
 Tables is needed for the export of Arrays in CSV -> isn't in use anymore? can be deleted?
-Printf is used in createPtFileWithRadiiInHighColumn. It put the columns in the right length
+Printf is used in createPtFileWithRadiiInHighColum. It put the columns in the right length
 LinearAlgebra is used for the regression in calculateRadiusWithLeastSquareFittingOfCircles!
 Geodesy converts different coordinate systems
 =#
 
-export TrackElement ##sonst würde er nach using TrackElements nur TrackElements.TrackElement kennen. Durch das export ändert sich das
+export getNodesOfOSMRelation
+export getNodesOfOSMWay
+export getRadiiOfNodes
 
 #=Ich arbeite in normalem Koordinatensystem, 
 nicht im Geodäten koordinatensystem
@@ -71,33 +73,8 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
 end ## getRadiiOfNodes
 
 
-function TrackElement(filePath::String, fileType::String) ##im filePath werden / benötigt
-    trackProperties = DataFrame()
-    outertrackProperties = DataFrame() ## enthält 4 Koordinaten: nördlichste, sündlichste, westlichste und östlichste
-    firstCoordinate = NamedTuple()
-    trackProperties = loadNodes(filePath, fileType)
-    # coord = loadCoord(file, type = :PT)
-    plotTrack(trackProperties)
-    
-    sortNodeOrder!(trackProperties)
-    plotTrack(trackProperties)
-    calculateAverageOfDifferentCentralRadii!(trackProperties)
-    calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
-    calculateRightsideRadiiFromTrack!(trackProperties)
-
-    #calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties)
-    #print(trackProperties)
-    
-    #createPtFileWithRadiiInHighColumn(trackProperties, :centralRadiiAverage)
-    #CSV.write("TrackProperties_relationID_4238488.csv", trackProperties)
-    #exporttrackPropertiesAndTrackPropertiesInCSV(trackProperties, trackProperties)
-    #createCSVFile(trackProperties)
-
-end ##TrackElement
-
-
-nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
-createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
+#nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
+#createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
 #getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488")
 
 #getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst")

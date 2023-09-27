@@ -1,3 +1,10 @@
+#=
+THE IMPORT
+
+=#
+
+
+
 function readPTFile(filePath::String)
     #= Variante Skipto ist unsauber: die ersten beiden Zeilen müssen übersprunge werden, aber sind es immer 2?
         schön wäre "comit" zu verstehen. Das scheint mir ein befehl zu sein mit dem man kommentare (also Strings) überspringt
@@ -13,6 +20,10 @@ function readPTFile(filePath::String)
     return trackProperties
 end ##readPTFile
 
+#= 
+The given CSV file has to contain at least 4 columns. The content of each column and the order of the columns in the CSV file is determined by 'columnNames'
+The first row of the CSV file will be skipped because it contains the header. If there isn't any header the first coordinate of the CSV file get lost.
+=#
 function readCSVFile(filePath::String)
     columnNames = [:ID, :x, :y, :z]
     trackProperties = CSV.read(filePath, DataFrame, header = columnNames,skipto = 2, select = [1,2,3,4])
@@ -20,8 +31,11 @@ function readCSVFile(filePath::String)
     return trackProperties
 end##readCSVFile
 
-function loadNodes(filePath::String, fileType::String)
-   
+#=
+depending on the filetype the function calls different load functions
+loadNodes returns a DataFrame, which can be used for the sorting and calculations
+=#
+function loadNodes(filePath::String, fileType::String)  
     trackProperties = DataFrame()
     if (filePath!=empty && fileType!=empty)
         uppercase(fileType)

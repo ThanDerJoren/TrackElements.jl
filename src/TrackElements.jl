@@ -59,9 +59,14 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
         calculateAverageOfDifferentCentralRadii!(trackProperties, radiiAmount, columnName)
         setStraightLineRadiiToInfinity!(trackProperties, columnName)
     end##for
+    # for limit in 1:6
+    #     columnName = Symbol("radiusThroughRegressionWith$((2*limit)+1)Nodes")
+    #     calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties, limit, columnName)
+    #     setStraightLineRadiiToInfinity!(trackProperties, columnName)
+    # end##for
 
     exportDataFrameToCSV(trackProperties, "data/trackProperties/TrackProperties_relationID_$(relationID)_$accessTime.csv")
-    save("data/trackProperties/TrackVisualization_relationID_$(relationID)_$accessTime.svg", trackVisualization)
+    #save("data/trackProperties/TrackVisualization_relationID_$(relationID)_$accessTime.svg", trackVisualization)
     return trackProperties
 end ## getRadiiOfNodes
 
@@ -91,11 +96,11 @@ function TrackElement(filePath::String, fileType::String) ##im filePath werden /
 end ##TrackElement
 
 
-#getNodesOfOSMRelation(4238488)
-#createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
+nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
+createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
 #getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488")
 
-getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst")
+#getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst")
 
 
 

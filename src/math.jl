@@ -195,13 +195,13 @@ function calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties::Abstr
     trackProperties[!, :leftCentralRightRadiiAverage] = leftCentralRightRadiiAverage
 end## calculateAverageOfLeftsideCenterRightsideRadii
 
-function calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties::AbstractDataFrame)
+function calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties::AbstractDataFrame, limit::Int, columnName::Symbol)
     #=hier soll der Radius durch eine Regression anngenähert werden.
     Dafür gibt es wieder eine Zentrale Koordinate. Mit dem parameter limit kann geregelt werden, wie viele Koordinaten je links und rechts vom Zentrum mit in die Regression mit einfließen soll.
     ACHTUNG: Die berechneten Radien sind komplett unrealistisch!!
     =#
     radiusThroughRegression = fill(0.0, size(trackProperties,1))
-    limit = 6
+    #limit = 6
     for center in limit+1:size(trackProperties,1)-limit
         A = [trackProperties[center-limit:center+limit,:x] trackProperties[center-limit:center+limit,:y] fill(1, limit*2+1)]
         B = [(trackProperties[center-limit:center+limit,:x]).^2+(trackProperties[center-limit:center+limit,:y]).^2] ## hier ist dim(B) = (1,1)
@@ -209,6 +209,6 @@ function calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties::Abstra
         x = pinv(A)*B
         radiusThroughRegression[center] = round(sqrt(4*(x[3])^2+x[1]^2+x[2]^2)/2) ## ACHTUNG hier wird gerundet
     end ## for center
-    trackProperties[!, :radiusThroughRegression] = radiusThroughRegression
+    trackProperties[!, columnName] = radiusThroughRegression
 end##calculateRadiusWithLeastSquareFittingOfCircles
         

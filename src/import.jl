@@ -1,28 +1,33 @@
 #=
-THE IMPORT
-
+REQUIREMENTS FOR THE IMPORT
+Every file that should be imported is supposed to contain per node at least a nodeID, x and y coordinate in the first three columns.
+The z Coordinate is optional. For completeness it is also read but right know it is not used in the calculations. 
+TODO where do I use the z Coordinate?
+TODO what happens if a file contains only 3 columns (error because select expect 4 columns?)
+There has to be only one node per row.
+The x and y coordinates have to be indicated in the UTM coordinate system. 
+Right now all nodes have to be located in one UTM zone. 
+TODO calculate the distance between of nodes in different UTM zones
 =#
 
-
-
+#=
+The content of each column and the order of the columns in the CSV file is determined by 'columnNames'
+The first two rows of the PT file will be skipped because they contains the header. If there isn't any header the first tow nodes of the CSV file get lost.
+All columns after the fourth will be ignored.
+The delimiter has to be one or more space character ' '
+=#
 function readPTFile(filePath::String)
-    #= Variante Skipto ist unsauber: die ersten beiden Zeilen müssen übersprunge werden, aber sind es immer 2?
-        schön wäre "comit" zu verstehen. Das scheint mir ein befehl zu sein mit dem man kommentare (also Strings) überspringt
-        das wäre optimal. Was gibt es noch für lösungen?
-    =#
-    #= 
-        Annahme: Koordinaten in PT dateien haben immer einen Index. Das ist die erste Spalte, die ich mit select überspringe
-        Wichtig: die Spalten müssen immer gleich heißen, sonst funktionieren die math.jl funktionen nicht
-    =#
     columnNames = [:ID, :x, :y, :z] ## Reihenfolge konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
-    trackProperties = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
+    trackProperties = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [1,2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
     print(trackProperties)
     return trackProperties
 end ##readPTFile
 
 #= 
-The given CSV file has to contain at least 4 columns. The content of each column and the order of the columns in the CSV file is determined by 'columnNames'
-The first row of the CSV file will be skipped because it contains the header. If there isn't any header the first coordinate of the CSV file get lost.
+The content of each column and the order of the columns in the CSV file is determined by 'columnNames'.
+The first row of the CSV file will be skipped because it contains the header. If there isn't any header the first nodes of the CSV file get lost.
+All columns after the fourth will be ignored.
+The delimiter has to be a comma ','
 =#
 function readCSVFile(filePath::String)
     columnNames = [:ID, :x, :y, :z]
@@ -33,7 +38,9 @@ end##readCSVFile
 
 #=
 depending on the filetype the function calls different load functions
-loadNodes returns a DataFrame, which can be used for the sorting and calculations
+loadNodes returns a DataFrame, which can be used for the sorting and calculations.
+It is importend that the columns of the DataFrame have alway the Symbols [:ID, :x, :y, :z], because the functions will call them by these names.
+Thats why the order of the columns isn't importend.
 =#
 function loadNodes(filePath::String, fileType::String)  
     trackProperties = DataFrame()

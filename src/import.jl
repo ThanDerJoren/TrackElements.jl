@@ -11,10 +11,15 @@ TODO calculate the distance between of nodes in different UTM zones
 =#
 
 #=
-The content of each column and the order of the columns in the CSV file is determined by 'columnNames'
+STRUCTURE trackProperties
+loadNodes returns a DataFrame, which can be used for the sorting and calculations.
+It is importend that the columns of the DataFrame have alway the Symbols [:ID, :x, :y, :z], because the functions will call them by these names.
+Thats why the order of the columns isn't importend.
+=#
+
+#=
+The content of each column and the order of the columns in the PT file is determined by 'columnNames'
 The first two rows of the PT file will be skipped because they contains the header. If there isn't any header the first tow nodes of the CSV file get lost.
-All columns after the fourth will be ignored.
-The delimiter has to be one or more space character ' '
 =#
 function readPTFile(filePath::String)
     columnNames = [:ID, :x, :y, :z] ## Reihenfolge konvertiert Geodätenkoordinatensystem in "normales Koordinatensystem"
@@ -25,9 +30,7 @@ end ##readPTFile
 
 #= 
 The content of each column and the order of the columns in the CSV file is determined by 'columnNames'.
-The first row of the CSV file will be skipped because it contains the header. If there isn't any header the first nodes of the CSV file get lost.
-All columns after the fourth will be ignored.
-The delimiter has to be a comma ','
+The first row of the CSV file will be skipped because it contains the header. If there isn't any header the first node of the CSV file get lost.
 =#
 function readCSVFile(filePath::String)
     columnNames = [:ID, :x, :y, :z]
@@ -36,12 +39,7 @@ function readCSVFile(filePath::String)
     return trackProperties
 end##readCSVFile
 
-#=
-depending on the filetype the function calls different load functions
-loadNodes returns a DataFrame, which can be used for the sorting and calculations.
-It is importend that the columns of the DataFrame have alway the Symbols [:ID, :x, :y, :z], because the functions will call them by these names.
-Thats why the order of the columns isn't importend.
-=#
+
 function loadNodes(filePath::String, fileType::String)  
     trackProperties = DataFrame()
     if (filePath!=empty && fileType!=empty)

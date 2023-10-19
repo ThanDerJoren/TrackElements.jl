@@ -1,10 +1,15 @@
+#=
+The Data Type DateTime uses special characters, which aren't allowed in a fileName.
+This function changes these special character to usable characters
+=#
 function dateTimeForFilePath(toAdjust::DateTime)
     return "D$(Date(toAdjust))T$(hour(toAdjust))_$(minute(toAdjust))"
-end ##dateTimeForFilePath
+end
 
 function exportDataFrameToCSV(data::DataFrame,FilePath::String) 
     CSV.write(FilePath, data)
-end##ArrayToCSV
+end
+
 
 function createPtFileWithRadii(trackProperties::AbstractDataFrame, radii:: Symbol)
     if(size(trackProperties,1)<10000000000000000) ## mehr EInträge kann pt nicht(zumindest die Nummerierung)
@@ -27,10 +32,12 @@ function createPtFileWithRadii(trackProperties::AbstractDataFrame, radii:: Symbo
                     lpad(zCoord,11+1," "),
                     lpad("",5+1," "), ##füllt die G Spalte mit Leerzeichen
                     lpad(radius,10+1," "))## das +1 für das Leerzeichen zwischen den Einträgen
-            end##for
-        end##open
-    end##if
+            end
+        end
+    end
 end
+
+
 
 function createPtFileForOSMNodes(nodesWithUTMCoordinates::AbstractDataFrame, filePath::String)
     if(size(nodesWithUTMCoordinates,1)<10000000000000000) ## mehr EInträge kann pt nicht(zumindest die Nummerierung)
@@ -47,7 +54,7 @@ function createPtFileForOSMNodes(nodesWithUTMCoordinates::AbstractDataFrame, fil
                     lpad(yCoord,15+1," "),
                     lpad(xCoord,15+1," "),
                     lpad(zCoord,11+1," "))
-            end##for
-        end##open
-    end##if
+            end
+        end
+    end
 end

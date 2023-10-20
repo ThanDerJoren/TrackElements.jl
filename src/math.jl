@@ -1,22 +1,32 @@
-#=
+#= TODO brauch ich diesen Kommentar noch?
 euclideanNorm funktioniert nur im zweidimensionalen
 angelBetweenVectors gibt eine Gradzahl zurück
 =#
-function getVectorFromTo(start::DataFrames.DataFrameRow, ending::DataFrames.DataFrameRow) ##getVector From start To ending
-    ##man könnte die Methode noch so abändern, dass auch hier named Tuple übergeben werden müssen
-    vector =(
+
+#=
+Each node in the DataFrame trackProperties has a position vector.
+If one want to know something about the ralation between two nodes (e.g. the distance), one need the Euclidean vector between these two nodes.
+The Euclidean vector points towards the ending Node.
+=#
+function getVectorFromTo(start::DataFrames.DataFrameRow, ending::DataFrames.DataFrameRow)
+    vector::NamedTuple =(
         x = ending[:x]-start[:x],
         y = ending[:y]-start[:y],
         z = ending[:z]-start[:z]
         )
-    return vector ##Datentyp: NamedTuple
-end ## getVectorFromTo
+    return vector
+end
 
-function getEuclideanNormOf(xValue::Number, yValue::Number ) ## Woher weiß ich welchen Datentyp meine WErte in trackProperties haben?
+function getEuclideanNormOf(xValue::Number, yValue::Number )
     length = sqrt((xValue^2)+(yValue^2))
     return length
-end ##getEuclideanNorm
+end 
 
+#=
+There are a few ways to get a cricle, thus the radius, through three nodes.
+I found the solution which used the complex plane mosed convincing:
+https://math.stackexchange.com/a/3503338
+=#
 function getRadiusOfThreeNodes(node1::DataFrames.DataFrameRow, node2::DataFrames.DataFrameRow, node3::DataFrames.DataFrameRow)
     z1 = node1[:x] + node1[:y]im
     z2 = node2[:x] + node2[:y]im
@@ -26,26 +36,29 @@ function getRadiusOfThreeNodes(node1::DataFrames.DataFrameRow, node2::DataFrames
     c = (z2-z1)*(w-abs2(w))/(w-conj(w))+z1
     r = abs(z1-c)
     return r
-end ## getRadiusOfThreeNodes
+end
 
+#=
+For a track width of 1435mm the highest radius of a curve is 25000m.
+Every node with a radius higher than 25000m lies probably in a straight part of the track.
+A straight track isn't something else than a curve with an infinity high radius.
+Thats way the attribute will be set to Inf.
+To see the transitions between curves and straight lines the radius has to be higher than 50000 to be set to Infinity.
+=#
 function setStraightLineRadiiToInfinity!(trackProperties::AbstractDataFrame, columnName::Symbol)
-    ## 25000 ist der maximal verbaute Radius
-    ## alles darüber kann als gerade angesehen werden -> sehr große radien
     for row in eachrow(trackProperties)
         if row[columnName] >50000
             row[columnName] = Inf
         end
     end
-end ## setStraightLineRadiiToInfinity
+end
 
-
-########################################################################
-########################################################################
-
-function getOutertrackProperties(trackProperties::AbstractDataFrame)
-    ## hier benötige ich explizit pass by value für trackProperties
-    # darüber begin finden macht leider doch keinen sinn
-    # Es wird je die nördlichste, sündlichste, westlichste und östlichste Koordinate abgespeichert
+#=
+This function finds the northernmost, southernmost, easternmost and westernmost node.
+For that the nodes have to be sorted again. To keep the order in the main DataFrame the nodes get copied in a new DataFrame.
+This information is importend to plot the nodes properly.
+=#
+function getOuterNodes(trackProperties::AbstractDataFrame)
     trackNodes = copy(trackProperties)
     outerTrackNodes = DataFrame()
     
@@ -57,21 +70,34 @@ function getOutertrackProperties(trackProperties::AbstractDataFrame)
     push!(outerTrackNodes, first(trackNodes))
     push!(outerTrackNodes, last(trackNodes))
     return outerTrackNodes
-end##getOutertrackProperties    
+end    
+
+#=-----------------------------------------------------------------------------------------------------------------
+Functions to bring the nodes in the right order
+------------------------------------------------------------------------------------------------------------------=#
+
+#=
+The nodes map the route of the track. After the import it's not safe that the order of the list matches the order of the nodes on the track.
+Every node has two neighbouring nodes (the previous and a following node), except the two ending nodes. 
+The function sortNodeOrder! starts at one of these ending nodes and searches node for node the next node with the shortest distance.
+The findFirstNode funtion finds one of the two nodes with only one neighbouring node.
+Therefore it also searches node for node the next node with the shortest distance. But it starts with a random node and at the end every node has two neighbouring nodes, so they build a circle.
+If the findFirstNode function starts with a middle node, one distance is from an ending node to the nearest free node. This distance is larger than every other distance.
+That means the node with the largest distance is one of the ending nodes.
+=#
 
 function findFirstNode(trackProperties::AbstractDataFrame)
-    trackProperties[!, :distanceToNextCoordinate] .= 0.0
+    trackProperties[!, :distanceToNextNode] .= 0.0
     trackProperties[!, :isVisited] .= false
     currentRow = DataFrame()
     nextRowToVisit = DataFrame()
     shortestDistance = Inf
     currentRow = trackProperties[1,:]
     currentRow[:isVisited] = true
-    coordinateWithLargestDistance = trackProperties[1,:]
-    #firstCoordinate::NamedTuple ##kann man so eine Variable deklarieren?
-    for i in 1:size(trackProperties,1) ##innerhalb dieser forschleife darf der DataFrame nicht neu sortiert werden
-        if(i==size(trackProperties,1)) ##Schließt den Kreis distanz von der letzten Coordinate zur ersten Koordinate des Durchlaufs (Standardmäßig 1. Zeile). Deswegen nicht neu sortieren, sonst ist die Koordinate in der ersten Zeile eine andere.
-            currentRow[:distanceToNextCoordinate] = getEuclideanNormOf(currentRow[:x]-trackProperties[1,:x], currentRow[:y]-trackProperties[1,:y])
+    nodeWithLargestDistance = trackProperties[1,:]
+    for i in 1:size(trackProperties,1)
+        if(i==size(trackProperties,1)) ## This calculates the distance between the first and last coordinate of the DataFrame, which builds the circle.
+            currentRow[:distanceToNextNode] = getEuclideanNormOf(currentRow[:x]-trackProperties[1,:x], currentRow[:y]-trackProperties[1,:y])
         else
             for comparedRow in eachrow(trackProperties)
                 if(!comparedRow[:isVisited])
@@ -79,31 +105,33 @@ function findFirstNode(trackProperties::AbstractDataFrame)
                     if(distance<shortestDistance)
                         shortestDistance=distance
                         nextRowToVisit = comparedRow
-                    end##if
-                end##if
-            end##for
-            currentRow[:distanceToNextCoordinate] = shortestDistance
+                    end
+                end
+            end
+            currentRow[:distanceToNextNode] = shortestDistance
             shortestDistance = Inf
             nextRowToVisit[:isVisited] = true
             currentRow = nextRowToVisit
-        end##if
-    end##for
+        end
+    end
     for item in eachrow(trackProperties)
-        if (item[:distanceToNextCoordinate]>coordinateWithLargestDistance[:distanceToNextCoordinate])
-            coordinateWithLargestDistance = item
-        end#if
-    end##for
-    firstCoordinate = (x=coordinateWithLargestDistance[:x], y=coordinateWithLargestDistance[:y], z=coordinateWithLargestDistance[:z])
-    select!(trackProperties, Not(:distanceToNextCoordinate))
-    return firstCoordinate
-end##findFirstCoordinate
+        if (item[:distanceToNextNode]>nodeWithLargestDistance[:distanceToNextNode])
+            nodeWithLargestDistance = item
+        end
+    end
+    firstNode = (x=nodeWithLargestDistance[:x], y=nodeWithLargestDistance[:y], z=nodeWithLargestDistance[:z])
+    select!(trackProperties, Not(:distanceToNextNode))
+    select!(trackProperties, Not(:isVisited))
+    return firstNode
+end
 
-function sortNodeOrder!(trackProperties::AbstractDataFrame) ## start soll 1 sein wenn nichts übergeben wird
+
+function sortNodeOrder!(trackProperties::AbstractDataFrame)
     firstNode = findFirstNode(trackProperties)
 
-    trackProperties[!,:sortIndex] .= 0 ##kann man auch leere Spalten einfügen?
-    trackProperties[!,:isVisited] .= false ## mit .= werden alle Zeilen mit dem gleichen wert befüllt?
-    currentRow = DataFrame() ##kann man definieren, dass es einfach nur ein DataFrameRow ist?
+    trackProperties[!,:sortIndex] .= 0 
+    trackProperties[!,:isVisited] .= false
+    currentRow = DataFrame()
     nextRowToVisit = DataFrame()
     shortestDistance = Inf
     

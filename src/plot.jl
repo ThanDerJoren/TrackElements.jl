@@ -32,7 +32,7 @@ end##plotWithMakie
 function plotTrack(trackProperties::AbstractDataFrame)
     colors = [repeat([:green, :blue], floor(Int,size(trackProperties,1)/2)); repeat([:green], size(trackProperties,1)%2)]## das Semikolon ist wichtig
 
-    outerTrackNodes = getOutertrackProperties(trackProperties)
+    outerTrackNodes = getOuterNodes(trackProperties)
     width = abs(outerTrackNodes[1, :x]- outerTrackNodes[2, :x])
     height = abs(outerTrackNodes[3, :y]-outerTrackNodes[4, :y])
     

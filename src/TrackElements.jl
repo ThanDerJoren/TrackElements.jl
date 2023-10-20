@@ -3,7 +3,7 @@ using DataFrames                                               ## main data stru
 using CSV, Tables, Printf                                      ## import/ export
 using LinearAlgebra                                            ## math
 using LightOSM, HTTP, LightXML, Geodesy                        ## osmAdjustment
-using CairoMakie; CairoMakie.activate!(type = "svg") #,GLMakie ## plot
+using CairoMakie; CairoMakie.activate!(type = "svg")           ## plot
 using Dates                                                    ## TrackElements
 #=
 EXPLANATION of some Packages
@@ -52,11 +52,12 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
     sortNodeOrder!(trackProperties)
     trackVisualization = plotTrack(trackProperties)
 
+    #=
     calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
     setStraightLineRadiiToInfinity!(trackProperties, :leftCentralRightRadiiAverage)
     calculateRightsideRadiiFromTrack!(trackProperties)
     setStraightLineRadiiToInfinity!(trackProperties, :rightsideRadii)
-    for radiiAmount in 1:6
+    for radiiAmount in 1:1
         columnName = Symbol("centralRadiiAverageOf$(radiiAmount)Radii")
         calculateAverageOfDifferentCentralRadii!(trackProperties, radiiAmount, columnName)
         setStraightLineRadiiToInfinity!(trackProperties, columnName)
@@ -69,6 +70,7 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
 
     exportDataFrameToCSV(trackProperties, "data/trackProperties/TrackProperties_relationID_$(relationID)_$accessTime.csv")
     #save("data/trackProperties/TrackVisualization_relationID_$(relationID)_$accessTime.svg", trackVisualization)
+    =#
     return trackProperties
 end ## getRadiiOfNodes
 
@@ -77,7 +79,7 @@ end ## getRadiiOfNodes
 #createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
 #getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488")
 
-#getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst")
+getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst")
 
 
 

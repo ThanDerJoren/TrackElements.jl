@@ -77,12 +77,8 @@ Functions to bring the nodes in the right order
 ------------------------------------------------------------------------------------------------------------------=#
 
 #=
-The nodes map the route of the track. After the import it's not safe that the order of the list matches the order of the nodes on the track.
-Every node has two neighbouring nodes (the previous and a following node), except the two ending nodes. 
-The function sortNodeOrder! starts at one of these ending nodes and searches node for node the next node with the shortest distance.
 The findFirstNode funtion finds one of the two nodes with only one neighbouring node.
-Therefore it also searches node for node the next node with the shortest distance. But it starts with a random node and at the end every node has two neighbouring nodes, so they build a circle.
-If the findFirstNode function starts with a middle node, one distance is from an ending node to the nearest free node. This distance is larger than every other distance.
+Therefore it searches node for node the next node with the shortest distance. It starts with a random node and at the end every node has two neighbouring nodes, so they build a circle. Because of this circle one distance is from one ending node to the nearest free node. This distance is larger than every other distance.
 That means the node with the largest distance is one of the ending nodes.
 =#
 
@@ -125,6 +121,11 @@ function findFirstNode(trackProperties::AbstractDataFrame)
     return firstNode
 end
 
+#=
+The nodes map the route of the track. After the import it's not safe that the order of the list matches the order of the nodes on the track.
+Every node has two neighbouring nodes (the previous and a following node), except the two ending nodes. 
+The function sortNodeOrder! starts at one of these ending nodes and searches node for node the next node with the shortest distance.
+=#
 
 function sortNodeOrder!(trackProperties::AbstractDataFrame)
     firstNode = findFirstNode(trackProperties)
@@ -135,40 +136,36 @@ function sortNodeOrder!(trackProperties::AbstractDataFrame)
     nextRowToVisit = DataFrame()
     shortestDistance = Inf
     
-    for item in eachrow(trackProperties) ##hier wird die firstCoordinate im Datensatz gesucht
+    for item in eachrow(trackProperties) ##searches the firstNode in the DataFrame trackProperties
         if(item[:x]==firstNode[:x] && item[:y]==firstNode[:y] && item[:z]==firstNode[:z])
-            currentRow = item ## hier entsteht ein DataFrameRow
-            currentRow[:isVisited] = true ##hier wird der Startpunkt konfiguriert
-            currentRow[:sortIndex] = 1  ##hier wird der Startpunkt konfiguriert
+            currentRow = item 
+            currentRow[:isVisited] = true
+            currentRow[:sortIndex] = 1  
             break
-        end##if
-    end##for
+        end
+    end
 
-    for i in 2:size(trackProperties,1) #mit 2 Anfange: 1. sortIndex stimmt sofort 2. Der Letzte Punkt hat keine "nextRowToVisit", darf den Prozess also nicht mehr durchlaufen
-        for comparedRow in eachrow(trackProperties) ## die Eigene Zeile muss ausgeschlossen werden!!
-            if(!comparedRow[:isVisited]) ## bereits besuchte Koordinaten müssen nicht mehr verglichen werden
+    for i in 2:size(trackProperties,1) #starts with 2 because the first node was found previously
+        for comparedRow in eachrow(trackProperties)
+            if(!comparedRow[:isVisited])
                 distance = getEuclideanNormOf(currentRow[:x]-comparedRow[:x],currentRow[:y]-comparedRow[:y])
-                #= Man guckt sich für jede Koordinate jede andere (nicht besuchte) Koordinate an
-                ist es die Kürzeste distanz, wird sie als die Folgekoordinate abgespeichert
-                findet man danach einen kürzeren Abstand, wird alles mit der neuen Folgekoordinate überschrieben
-                =#
                 if(distance < shortestDistance)
                     shortestDistance = distance
                     nextRowToVisit = comparedRow
                     comparedRow[:sortIndex] = i
-                end #if
-            end##if
-        end##for
-        nextRowToVisit[:isVisited] = true ##erst hier ist sicher, welche koordinate den kürzesten Abstand hat
+                end
+            end
+        end
+        nextRowToVisit[:isVisited] = true
         currentRow = nextRowToVisit
-        shortestDistance = Inf ##für den nächsten durchlauf wieder reseten
-    end ## for loop  
+        shortestDistance = Inf
+    end
     sort!(trackProperties, :sortIndex)
     #print(trackProperties)
     select!(trackProperties, Not(:isVisited))
-    select!(trackProperties, Not(:sortIndex)) ##wie schaffe ich das in einer Zeile?
+    select!(trackProperties, Not(:sortIndex))
     println(trackProperties)
-end ##sortByDistance
+end
 
 ############################################################################
 ############################################################################

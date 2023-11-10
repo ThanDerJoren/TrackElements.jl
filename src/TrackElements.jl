@@ -52,7 +52,7 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
     sortNodeOrder!(trackProperties)
     trackVisualization = plotTrack(trackProperties)
 
-    #=
+    
     calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
     setStraightLineRadiiToInfinity!(trackProperties, :leftCentralRightRadiiAverage)
     calculateRightsideRadiiFromTrack!(trackProperties)
@@ -70,7 +70,7 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
 
     exportDataFrameToCSV(trackProperties, "data/trackProperties/TrackProperties_relationID_$(relationID)_$accessTime.csv")
     #save("data/trackProperties/TrackVisualization_relationID_$(relationID)_$accessTime.svg", trackVisualization)
-    =#
+    
     return trackProperties
 end ## getRadiiOfNodes
 
@@ -79,7 +79,7 @@ end ## getRadiiOfNodes
 #createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
 #getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488")
 
-getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst")
+getRadiiOfNodes("data/ptTracks/R200m_Punktabstand100m.PT", "PT", "R200m_Punktabstand100m")
 
 
 

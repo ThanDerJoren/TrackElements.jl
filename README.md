@@ -13,5 +13,6 @@ Right now all nodes have to be located in one UTM zone.
 # Was ich hier erklären sollte.
 bei PT file oben steht y und x, drunter stehen die Koordinaten aber andersrum (also x und y)
 aufbau eines PT files (damit die exportfunktionen verstanden werden)
+UTM Zonen Systematik: plus 500.000 -> eine Koordinaten urprung. Alles passiert im ersten Quadranten, die Knoten lassen sich als ORtsvektoren betrachten
 
 [![Build Status](https://github.com/ThanDerJoren/TrackElements.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/ThanDerJoren/TrackElements.jl/actions/workflows/CI.yml?query=branch%3Amaster)

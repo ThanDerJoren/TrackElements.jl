@@ -4,11 +4,7 @@
 
 using DataFrames
 df1 = DataFrame(a = [1,2], b = [3,4])
-df2 = DataFrame()
-push!(df2, df1[1,:])
-#println(df1)
-#df2=copy(df1)
-#print(df2[1,:a])
-# df2[1,:a] = 5
-# println(df1)
-println(df2)
+print(typeof(df1[in(2).(df1.a), :b]))
+print(first(filter(row -> row.a ==2, df1)[!,:b]))
+print(df1[1,2])
+filter(row -> row.a ==2, df1)[1,:b]

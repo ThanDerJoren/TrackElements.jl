@@ -50,13 +50,13 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
     accessTime = dateTimeForFilePath(now())
     trackProperties = loadNodes(filePath, fileType)
     sortNodeOrder!(trackProperties)
-    trackVisualization = plotTrack(trackProperties)
+    #trackVisualization = plotTrack(trackProperties)
 
     
     calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
     setStraightLineRadiiToInfinity!(trackProperties, :leftCentralRightRadiiAverage)
-    calculateRightsideRadiiFromTrack!(trackProperties)
-    setStraightLineRadiiToInfinity!(trackProperties, :rightsideRadii)
+    #calculateRightsideRadiiFromTrack!(trackProperties)
+    #setStraightLineRadiiToInfinity!(trackProperties, :rightsideRadii)
     for radiiAmount in 1:1
         columnName = Symbol("centralRadiiAverageOf$(radiiAmount)Radii")
         calculateAverageOfDifferentCentralRadii!(trackProperties, radiiAmount, columnName)
@@ -79,7 +79,14 @@ end ## getRadiiOfNodes
 #createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
 #getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488")
 
-getRadiiOfNodes("data/ptTracks/R200m_Punktabstand100m.PT", "PT", "R200m_Punktabstand100m")
+# getRadiiOfNodes("data/ptTracks/R200m_Punktabstand100m.PT", "PT", "R200m_Punktabstand100m")
+# getRadiiOfNodes("data/ptTracks/R1000m_Punktabstand100m.PT", "PT", "R1000m_Punktabstand100m")
+# getRadiiOfNodes("data/ptTracks/R1000m_Punktabstand200m.PT", "PT", "R1000m_Punktabstand200m")
+# getRadiiOfNodes("data/ptTracks/R5000m_Punktabstand200m.PT", "PT", "R5000m_Punktabstand200m")
+# getRadiiOfNodes("data/ptTracks/R10000m_Punktabstand200m.PT", "PT", "R10000m_Punktabstand200m")
+# getRadiiOfNodes("data/ptTracks/R15000m_Punktabstand200m_Fehlerhafte-Schnittpunkterkennung-ProVI.PT", "PT", "R15000m_Punktabstand200m_Fehlerhafte-Schnittpunkterkennung-ProVI")
+# getRadiiOfNodes("data/ptTracks/R20000m_Punktabstand200m.PT", "PT", "R20000m_Punktabstand200m")
+getRadiiOfNodes("data/ptTracks/R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI.pt", "PT", "R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI")
 
 
 

@@ -164,7 +164,7 @@ function sortNodeOrder!(trackProperties::AbstractDataFrame)
     #print(trackProperties)
     select!(trackProperties, Not(:isVisited))
     select!(trackProperties, Not(:sortIndex))
-    println(trackProperties)
+    #println(trackProperties)
 end
 
 ############################################################################

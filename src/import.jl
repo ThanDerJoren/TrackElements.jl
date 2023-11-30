@@ -12,7 +12,7 @@ The first two rows of the PT file will be skipped because they contains the head
 function readPTFile(filePath::String)
     columnNames = [:ID, :x, :y, :z]
     trackProperties = CSV.read(filePath, DataFrame, header = columnNames, skipto = 3 , select = [1,2,3,4], delim =' ',  ignorerepeated = true) ##Mit ignorerepeated werdne die vielen leerzeichen ignoriert
-    print(trackProperties)
+    #print(trackProperties)
     return trackProperties
 end 
 

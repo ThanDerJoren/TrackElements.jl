@@ -14,3 +14,7 @@ trackProperties = TrackElements.loadNodes("test/data/R200m_Punktabstand100m.PT",
 print(trackProperties)
 TrackElements.changeNodeID(trackProperties)
 print(trackProperties)
+
+
+filetype = "csv"
+uppercase(filetype)

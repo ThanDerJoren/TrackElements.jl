@@ -1,8 +1,3 @@
-#= TODO brauch ich diesen Kommentar noch?
-euclideanNorm funktioniert nur im zweidimensionalen
-angelBetweenVectors gibt eine Gradzahl zurück
-=#
-
 #=
 Each node in the DataFrame trackProperties has a position vector.
 If one want to know something about the ralation between two nodes (e.g. the distance), one need the Euclidean vector between these two nodes.
@@ -43,7 +38,7 @@ For a track width of 1435mm the highest radius of a curve is 25000m.
 Every node with a radius higher than 25000m lies probably in a straight part of the track.
 A straight track isn't something else than a curve with an infinity high radius.
 Thats way the attribute will be set to Inf.
-To see the transitions between curves and straight lines the radius has to be higher than 50000 to be set to Infinity.
+To see the transitions between curves and straight lines the radius has to be higher than 50000m to be set to Infinity.
 =#
 function setStraightLineRadiiToInfinity!(trackProperties::AbstractDataFrame, columnName::Symbol)
     for row in eachrow(trackProperties)
@@ -55,7 +50,7 @@ end
 
 #=
 This function finds the northernmost, southernmost, easternmost and westernmost node.
-For that the nodes have to be sorted again. To keep the order in the main DataFrame the nodes get copied in a new DataFrame.
+For that the nodes have to be sorted again. To keep the order in the main DataFrame, the nodes get copied in a new DataFrame.
 This information is importend to plot the nodes properly.
 =#
 function getOuterNodes(trackProperties::AbstractDataFrame)
@@ -81,7 +76,6 @@ The findFirstNode funtion finds one of the two nodes with only one neighbouring 
 Therefore it searches node for node the next node with the shortest distance. It starts with a random node and at the end every node has two neighbouring nodes, so they build a circle. Because of this circle one distance is from one ending node to the nearest free node. This distance is larger than every other distance.
 That means the node with the largest distance is one of the ending nodes.
 =#
-
 function findFirstNode(trackProperties::AbstractDataFrame)
     trackProperties[!, :distanceToNextNode] .= 0.0
     trackProperties[!, :isVisited] .= false
@@ -124,9 +118,8 @@ end
 #=
 The nodes map the route of the track. After the import it's not safe that the order of the list matches the order of the nodes on the track.
 Every node has two neighbouring nodes (the previous and a following node), except the two ending nodes. 
-The function sortNodeOrder! starts at one of these ending nodes and searches node for node the next node with the shortest distance.
+The function sortNodeOrder! starts at one of these ending nodes and searches node for node the following node with the shortest distance.
 =#
-
 function sortNodeOrder!(trackProperties::AbstractDataFrame)
     firstNode = findFirstNode(trackProperties)
 
@@ -167,73 +160,65 @@ function sortNodeOrder!(trackProperties::AbstractDataFrame)
     #println(trackProperties)
 end
 
-############################################################################
-############################################################################
+#=-----------------------------------------------------------------------------------------------------------------
+Functions to calculate the radius of each node 
+------------------------------------------------------------------------------------------------------------------=#
 
-function calculateRightsideRadiiFromTrack!(trackProperties::AbstractDataFrame)
-    rightsideRadii = fill(0.0, size(trackProperties,1)) ## es muss sichergestellt werden, dass alle Arrays, die trackProperties hinzugefügt werden sollen, die gleiche Länge haben
-    for i in 1:size(trackProperties, 1)-2
-        rightsideRadii[i] = getRadiusOfThreeNodes(trackProperties[i,:], trackProperties[i+1,:], trackProperties[i+2,:])
-    end ##for
-    trackProperties[!, :rightsideRadii] = rightsideRadii ## hier wird das vorher berechnete Array, dass genauso lang ist wie der Koordinaten DataFrame, als Spalte zu dem DataFrame trackProperties hinzugefügt.
-end ##calculateRadiiFromTrack
-
+#=
+There is one current node n, for which the radius will be calculated.
+The (central) Radius will be calculated with n-j, n, n+j. So one node is always before n and one node is always behind n.
+The functions calculates all raddi from R(n-1, n, n+1) to R(n-radiiAmount, n, n+radiiAmount)
+The final radius is the average of all calculated radii.
+=#
 function calculateAverageOfDifferentCentralRadii!(trackProperties::AbstractDataFrame, radiiAmount::Int, columnName::Symbol)
-    ##radiiAmount: Aus wie vielen Radien der Mittelwert berechnet werden soll
-    #= Es werden mehrere Radien aus 3 Koordinaten berechnet. Dabei bleibt eine Koordinate immer gleich(central).
-    Es wird immer eine Koordinate rechts und eine links von der Zentralen Koordinate gewählt.
-    Bei dem ersten radius werden die Koordinaten direkt je rechts und links von der Zentralen Koordinate gewählt.
-    Bei jedem weiteren Radius, der berechnet wird, wird der Abstand zur Zentralen Koordinate immer um eine Koordinate vergrößert.
-    Der Parameter "radiiPerCoordinate" gibt dabei an wie viele Radien pro Zentraler Koordinate berechnet werden.
-    Wie viele Koordinaten also maximal nach links und rechts gewandert werden.
-    Am Ende wird das arithmetische Mittel aus allen berechneten Radien gebildet.
-    =#
     centralRadiiAverage = fill(0.0, size(trackProperties,1))
-    for center in radiiAmount+1:size(trackProperties,1)-radiiAmount ## es werden z.B. 3 Radien gebildet, von der letzten zentralen Koordinate braucht man noch 3 Koordinaten zu jedem Rand
+    for center in radiiAmount+1:size(trackProperties,1)-radiiAmount # The first node which can get a radius is not the first node in the DataFrame, because you need the amount of 'radiiAmount' nodes before the first node. The same applies for the end of the DataFrame.
         radiusAverage = 0
         for i in 1:radiiAmount
             radiusAverage = radiusAverage+getRadiusOfThreeNodes(trackProperties[center-i,:], trackProperties[center,:], trackProperties[center+i,:])
-        end ## for i
+        end 
         radiusAverage = radiusAverage/radiiAmount
-        centralRadiiAverage[center] = round(radiusAverage) ##ACHTUNG hier wird gerundet
-    end ##for center
+        centralRadiiAverage[center] = round(radiusAverage)
+    end
     trackProperties[!, columnName] = centralRadiiAverage
-end ##calculateAverageRadiiOfDifferentCentralRadii
+end
 
+
+#=
+There is one current node n, for which the radius will be calculated.
+There are three ways to arrange two nodes arround the main node n.
+left:       n-2, n-1, n
+central:    n-1, n,   n+1
+right:      n,   n+1, n+2
+The final radius is the average of the three radii.
+=#
 function calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties::AbstractDataFrame)
-    #= Es werden 3 Radien aus je 3 Koordinaten berechnet. Dabei betrachtet man eine Koordinate als Zentral.
-    Die beiden weiteren Koordinaten sind
-    a) die beiden nächsten Koordinaten direkt links von der zentralen Koordinate (linksseitiger Radius)
-    b) direkt links und rechts neben der zentralen Koordinate (zentraler Radius)
-    c) die beiden nächsten Koordinaten direkt rechts von der zentralen Koordinate (rechtsseitiger Radius)
-    Aus diesen 3 Radien wird dann das arithmetische Mittel gebildet.
-    =#
     leftCentralRightRadiiAverage = fill(0.0, size(trackProperties,1))
-    for center in 3:size(trackProperties,1)-2 ## Am Rand müssen neben dem letzten zu berechnenden center noch 2 Koordinaten verfügbar sein
+    for currentNode in 3:size(trackProperties,1)-2 # The first node which can get a radius is not the first node in the DataFrame, because you need 2 nodes before the main node. The same applies for the end of the DataFrame.
         radiusAverage = 0
-        leftsideRadius = getRadiusOfThreeNodes(trackProperties[center-2,:], trackProperties[center-1,:], trackProperties[center,:])
-        centralRadius = getRadiusOfThreeNodes(trackProperties[center-1,:], trackProperties[center,:], trackProperties[center+1,:])
-        rightsideRadius = getRadiusOfThreeNodes(trackProperties[center,:], trackProperties[center+1,:], trackProperties[center+2,:])
+        leftsideRadius = getRadiusOfThreeNodes(trackProperties[currentNode-2,:], trackProperties[currentNode-1,:], trackProperties[currentNode,:])
+        centralRadius = getRadiusOfThreeNodes(trackProperties[currentNode-1,:], trackProperties[currentNode,:], trackProperties[currentNode+1,:])
+        rightsideRadius = getRadiusOfThreeNodes(trackProperties[currentNode,:], trackProperties[currentNode+1,:], trackProperties[currentNode+2,:])
         radiusAverage = (leftsideRadius+centralRadius+rightsideRadius)/3
-        leftCentralRightRadiiAverage[center] = round(radiusAverage) ##ACHTUNG hier wird gerundet
-    end ## for center
+        leftCentralRightRadiiAverage[currentNode] = round(radiusAverage)
+    end
     trackProperties[!, :leftCentralRightRadiiAverage] = leftCentralRightRadiiAverage
-end## calculateAverageOfLeftsideCenterRightsideRadii
+end
 
+
+#=
+Radius through circular regression. But the "circle" is more a straight line, so the results are nowhere near the actual rdii.
+https://lucidar.me/en/mathematics/least-squares-fitting-of-circle/
+=#
 function calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties::AbstractDataFrame, limit::Int, columnName::Symbol)
-    #=hier soll der Radius durch eine Regression anngenähert werden.
-    Dafür gibt es wieder eine Zentrale Koordinate. Mit dem parameter limit kann geregelt werden, wie viele Koordinaten je links und rechts vom Zentrum mit in die Regression mit einfließen soll.
-    ACHTUNG: Die berechneten Radien sind komplett unrealistisch!!
-    =#
     radiusThroughRegression = fill(0.0, size(trackProperties,1))
     #limit = 6
     for center in limit+1:size(trackProperties,1)-limit
         A = [trackProperties[center-limit:center+limit,:x] trackProperties[center-limit:center+limit,:y] fill(1, limit*2+1)]
-        B = [(trackProperties[center-limit:center+limit,:x]).^2+(trackProperties[center-limit:center+limit,:y]).^2] ## hier ist dim(B) = (1,1)
-        B = B[1] ## vorher liegt der gesamte vektor in einem Eintrag, dem ersten. Jetz ist dim(B)=(7,1)
+        B = [(trackProperties[center-limit:center+limit,:x]).^2+(trackProperties[center-limit:center+limit,:y]).^2] 
+        B = B[1]
         x = pinv(A)*B
-        radiusThroughRegression[center] = round(sqrt(4*(x[3])^2+x[1]^2+x[2]^2)/2) ## ACHTUNG hier wird gerundet
-    end ## for center
+        radiusThroughRegression[center] = round(sqrt(4*(x[3])^2+x[1]^2+x[2]^2)/2)
+    end
     trackProperties[!, columnName] = radiusThroughRegression
-end##calculateRadiusWithLeastSquareFittingOfCircles
-        
+end

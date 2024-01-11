@@ -7,7 +7,7 @@ using CairoMakie; CairoMakie.activate!(type = "svg")           ## plot
 using Dates                                                    ## TrackElements
 #=
 EXPLANATION of some Packages
-Tables is needed for the export of Arrays in CSV -> isn't in use anymore? can be deleted?
+Tables is needed for the export of Arrays in CSV -> TODO isn't in use anymore? can be deleted?
 Printf is used in createPtFileWithRadiiInHighColum. It put the columns in the right length
 LinearAlgebra is used for the regression in calculateRadiusWithLeastSquareFittingOfCircles!
 Geodesy converts different coordinate systems
@@ -34,7 +34,7 @@ function getNodesOfOSMRelation(relationID::Int)
     nodesWithUTMCoordinates = convertLLAtoUTM()
     exportDataFrameToCSV(nodesWithUTMCoordinates,"data/osmRelations/relationID_$(relationID)_$accessTime.csv")
     return nodesWithUTMCoordinates
-end ##getNodesOfOSMRelation
+end
 
 function getNodesOfOSMWay(wayID::Int)
     accessTime = dateTimeForFilePath(now())
@@ -43,41 +43,43 @@ function getNodesOfOSMWay(wayID::Int)
     nodesWithUTMCoordinates = convertLLAtoUTM()
     exportDataFrameToCSV(nodesWithUTMCoordinates,"data/osmRelations/relationID_$(relationID)_$accessTime.csv")
     return nodesWithUTMCoordinates
-end ##getNodesOfOSMWay
+end 
 
-function getRadiiOfNodes(filePath::String, fileType::String, relationID::String)
-    ##relationID bewusst ein String, damit man andere namen wählen kann, falls nicht von OSM
+function getRadiiOfNodes(filePath::String, fileType::String, relationID::String; radiiToCSV=true, trackVisalizationToSVG=false)
+## relationID is a String, so one can give readable names
     accessTime = dateTimeForFilePath(now())
     trackProperties = loadNodes(filePath, fileType)
     sortNodeOrder!(trackProperties)
-    #trackVisualization = plotTrack(trackProperties)
-
+    trackVisualization = plotTrack(trackProperties)
     
     calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
     setStraightLineRadiiToInfinity!(trackProperties, :leftCentralRightRadiiAverage)
-    #calculateRightsideRadiiFromTrack!(trackProperties)
-    #setStraightLineRadiiToInfinity!(trackProperties, :rightsideRadii)
-    for radiiAmount in 1:1
+    for radiiAmount in 3:3
         columnName = Symbol("centralRadiiAverageOf$(radiiAmount)Radii")
         calculateAverageOfDifferentCentralRadii!(trackProperties, radiiAmount, columnName)
         setStraightLineRadiiToInfinity!(trackProperties, columnName)
-    end##for
+    end
+    
+    ## Don't delete! For demonstration purposes that circular regression doesen't work:
     # for limit in 1:6
     #     columnName = Symbol("radiusThroughRegressionWith$((2*limit)+1)Nodes")
     #     calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties, limit, columnName)
     #     setStraightLineRadiiToInfinity!(trackProperties, columnName)
-    # end##for
+    # end
 
-    exportDataFrameToCSV(trackProperties, "data/trackProperties/TrackProperties_relationID_$(relationID)_$accessTime.csv")
-    #save("data/trackProperties/TrackVisualization_relationID_$(relationID)_$accessTime.svg", trackVisualization)
-    
+    if radiiToCSV
+        exportDataFrameToCSV(trackProperties, "data/trackProperties/TrackProperties_relationID_$(relationID)_$accessTime.csv")
+    end
+    if trackVisalizationToSVG
+        save("data/trackProperties/TrackVisualization_relationID_$(relationID)_$accessTime.svg", trackVisualization)
+    end
     return trackProperties
-end ## getRadiiOfNodes
+end
 
 
 #nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
 #createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
-#getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488")
+getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
 
 # getRadiiOfNodes("data/ptTracks/R200m_Punktabstand100m.PT", "PT", "R200m_Punktabstand100m")
 # getRadiiOfNodes("data/ptTracks/R1000m_Punktabstand100m.PT", "PT", "R1000m_Punktabstand100m")
@@ -86,11 +88,7 @@ end ## getRadiiOfNodes
 # getRadiiOfNodes("data/ptTracks/R10000m_Punktabstand200m.PT", "PT", "R10000m_Punktabstand200m")
 # getRadiiOfNodes("data/ptTracks/R15000m_Punktabstand200m_Fehlerhafte-Schnittpunkterkennung-ProVI.PT", "PT", "R15000m_Punktabstand200m_Fehlerhafte-Schnittpunkterkennung-ProVI")
 # getRadiiOfNodes("data/ptTracks/R20000m_Punktabstand200m.PT", "PT", "R20000m_Punktabstand200m")
-getRadiiOfNodes("data/ptTracks/R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI.pt", "PT", "R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI")
+#getRadiiOfNodes("data/ptTracks/R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI.pt", "PT", "R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI")
 
 
-
-#TrackElement("test/data/StreckenachseFreihandErfasst(ausProVI).PT", ".PT")
-#TrackElement("test/data/relationID_4238488.csv", ".CSV")
-
-end##module TrackElements
+end

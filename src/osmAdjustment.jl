@@ -1,3 +1,8 @@
+#=-----------------------------------------------------------------------------------------------------------------
+This file contains modified code from the project TrainPathFetcher:
+https://github.com/railtoolkit/TrainPathFetcher.jl
+------------------------------------------------------------------------------------------------------------------=#
+
 #
 # This function was created in the LightOSM-Package and is under the Copyright of this Package -> https://github.com/DeloitteDigitalAPAC/LightOSM.jl
 # For the usage in this prototype the original LightOSM-function was addapted.
@@ -494,7 +499,7 @@ function removeWay(id::Int)
 end
 
 #
-#Diese Funktion convertiert die GEographischen Koordinaten in UTM koordinaten mit Geodesy
+#This function converts geographic coordinates in UTM coordinates
 #
 
 function convertLLAtoUTM()

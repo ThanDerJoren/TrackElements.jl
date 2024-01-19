@@ -17,10 +17,6 @@ export getNodesOfOSMRelation
 export getNodesOfOSMWay
 export getRadiiOfNodes
 
-#=Ich arbeite in normalem Koordinatensystem, 
-nicht im Geodäten koordinatensystem
-=#
-
 include("import.jl")
 include("osmAdjustment.jl")
 include("math.jl")
@@ -45,7 +41,6 @@ function getNodesOfOSMWay(wayID::Int)
     return nodesWithUTMCoordinates
 end 
 
-function getRadiiOfNodes(filePath::String, fileType::String, relationID::String; radiiToCSV=true, trackVisalizationToSVG=false)
 ## relationID is a String, so one can give readable names
     accessTime = dateTimeForFilePath(now())
     trackProperties = loadNodes(filePath, fileType)
@@ -54,7 +49,7 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String;
     
     calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
     setStraightLineRadiiToInfinity!(trackProperties, :leftCentralRightRadiiAverage)
-    for radiiAmount in 3:3
+    for radiiAmount in 1:3
         columnName = Symbol("centralRadiiAverageOf$(radiiAmount)Radii")
         calculateAverageOfDifferentCentralRadii!(trackProperties, radiiAmount, columnName)
         setStraightLineRadiiToInfinity!(trackProperties, columnName)
@@ -79,7 +74,8 @@ end
 
 #nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
 #createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
-getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
+#getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
+getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst", trackVisalizationToSVG = true )
 
 # getRadiiOfNodes("data/ptTracks/R200m_Punktabstand100m.PT", "PT", "R200m_Punktabstand100m")
 # getRadiiOfNodes("data/ptTracks/R1000m_Punktabstand100m.PT", "PT", "R1000m_Punktabstand100m")

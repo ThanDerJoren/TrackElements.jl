@@ -41,7 +41,8 @@ function getNodesOfOSMWay(wayID::Int)
     return nodesWithUTMCoordinates
 end 
 
-## relationID is a String, so one can give readable names
+function getRadiiOfNodes(filePath::String, fileType::String, relationID::String; radiiToCSV=true, trackVisalizationToSVG=false)
+    ## relationID is a String, so one can give readable names
     accessTime = dateTimeForFilePath(now())
     trackProperties = loadNodes(filePath, fileType)
     sortNodeOrder!(trackProperties)
@@ -75,7 +76,7 @@ end
 #nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
 #createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
 #getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
-getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst", trackVisalizationToSVG = true )
+getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst", trackVisalizationToSVG = false )
 
 # getRadiiOfNodes("data/ptTracks/R200m_Punktabstand100m.PT", "PT", "R200m_Punktabstand100m")
 # getRadiiOfNodes("data/ptTracks/R1000m_Punktabstand100m.PT", "PT", "R1000m_Punktabstand100m")

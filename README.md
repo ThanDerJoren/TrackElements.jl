@@ -8,6 +8,7 @@ The z Coordinate is optional. For completeness it is also read but right know it
 There has to be only one node per row.
 The x and y coordinates have to be indicated in the UTM coordinate system. 
 Right now all nodes have to be located in one UTM zone. 
+**TODO** x ist die Abszisse, y ist die Ordinate
 **TODO** calculate the distance between of nodes in different UTM zones
 
 # Was ich hier erklären sollte.

@@ -207,7 +207,7 @@ end
 
 
 #=
-Radius through circular regression. But the "circle" is more a straight line, so the results are nowhere near the actual rdii.
+Radius through circular regression. But the "circle" is more a straight line, so the results are nowhere near the actual radii.
 https://lucidar.me/en/mathematics/least-squares-fitting-of-circle/
 =#
 function calculateRadiusWithLeastSquareFittingOfCircles!(trackProperties::AbstractDataFrame, limit::Int, columnName::Symbol)

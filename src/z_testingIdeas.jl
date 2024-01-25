@@ -9,12 +9,9 @@
 # print(df1[1,2])
 # filter(row -> row.a ==2, df1)[1,:b]
 
-using TrackElements
-trackProperties = TrackElements.loadNodes("test/data/R200m_Punktabstand100m.PT", "PT")
-print(trackProperties)
-TrackElements.changeNodeID(trackProperties)
-print(trackProperties)
+i =1
+while i<=5
+    println(i)
+    i +=1
+end
 
-
-filetype = "csv"
-uppercase(filetype)

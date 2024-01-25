@@ -71,21 +71,12 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String;
     end
     return trackProperties
 end
-
-
-#nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
-#createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
-#getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
-getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst", trackVisalizationToSVG = false )
-
-# getRadiiOfNodes("data/ptTracks/R200m_Punktabstand100m.PT", "PT", "R200m_Punktabstand100m")
-# getRadiiOfNodes("data/ptTracks/R1000m_Punktabstand100m.PT", "PT", "R1000m_Punktabstand100m")
-# getRadiiOfNodes("data/ptTracks/R1000m_Punktabstand200m.PT", "PT", "R1000m_Punktabstand200m")
-# getRadiiOfNodes("data/ptTracks/R5000m_Punktabstand200m.PT", "PT", "R5000m_Punktabstand200m")
-# getRadiiOfNodes("data/ptTracks/R10000m_Punktabstand200m.PT", "PT", "R10000m_Punktabstand200m")
-# getRadiiOfNodes("data/ptTracks/R15000m_Punktabstand200m_Fehlerhafte-Schnittpunkterkennung-ProVI.PT", "PT", "R15000m_Punktabstand200m_Fehlerhafte-Schnittpunkterkennung-ProVI")
-# getRadiiOfNodes("data/ptTracks/R20000m_Punktabstand200m.PT", "PT", "R20000m_Punktabstand200m")
-#getRadiiOfNodes("data/ptTracks/R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI.pt", "PT", "R25000m_Punktabstand200m_fehlerhafteSchnittpunkterkennungProVI")
-
-
+getRadiiOfNodes("data/osmRelations/relationID_4238488_missing_values.csv", "csv", "4238488_missing_values")
+#getRadiiOfNodes("data/osmRelations/relationID_4238488_without-z.csv", "csv", "4238488_without-z")
 end
+
+nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
+createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
+getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
+getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst", trackVisalizationToSVG = false )
+TrackElements.getRadiiOfNodes("data/osmRelations/relationID_4238488_missing_values.csv", "csv", "4238488_missing_values")

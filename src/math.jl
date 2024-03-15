@@ -165,6 +165,7 @@ Functions to calculate the radius of each node
 ------------------------------------------------------------------------------------------------------------------=#
 
 #=
+This calculation is based on the concept, that there exist only one circle (and its radius) which goes through three specific points in a 2D coordinate System.
 There is one current node n, for which the radius will be calculated.
 The (central) Radius will be calculated with n-j, n, n+j. So one node is always before n and one node is always behind n.
 The functions calculates all raddi from R(n-1, n, n+1) to R(n-radiiAmount, n, n+radiiAmount)
@@ -185,6 +186,7 @@ end
 
 
 #=
+This calculation is based on the concept, that there exist only one circle (and its radius) which goes through three specific points in a 2D coordinate System.
 There is one current node n, for which the radius will be calculated.
 There are three ways to arrange two nodes arround the main node n.
 left:       n-2, n-1, n

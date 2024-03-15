@@ -37,7 +37,7 @@ function getNodesOfOSMWay(wayID::Int)
     getOSMWayXML(wayID)
     extractTrackNodes(wayID, "way")
     nodesWithUTMCoordinates = convertLLAtoUTM()
-    exportDataFrameToCSV(nodesWithUTMCoordinates,"data/osmRelations/relationID_$(relationID)_$accessTime.csv")
+    exportDataFrameToCSV(nodesWithUTMCoordinates,"data/osmRelations/wayID_$(wayID)_$accessTime.csv")
     return nodesWithUTMCoordinates
 end 
 
@@ -50,7 +50,7 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String;
     
     calculateAverageOfLeftsideCentralRightsideRadii!(trackProperties)
     setStraightLineRadiiToInfinity!(trackProperties, :leftCentralRightRadiiAverage)
-    for radiiAmount in 1:3
+    for radiiAmount in 3:3
         columnName = Symbol("centralRadiiAverageOf$(radiiAmount)Radii")
         calculateAverageOfDifferentCentralRadii!(trackProperties, radiiAmount, columnName)
         setStraightLineRadiiToInfinity!(trackProperties, columnName)
@@ -71,7 +71,7 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String;
     end
     return trackProperties
 end
-getRadiiOfNodes("data/osmRelations/relationID_4238488_missing_values.csv", "csv", "4238488_missing_values")
+getRadiiOfNodes("data/osmRelations/relationID_4238488_without ID.csv", "csv", "4238488_missing_values")
 #getRadiiOfNodes("data/osmRelations/relationID_4238488_without-z.csv", "csv", "4238488_without-z")
 end
 

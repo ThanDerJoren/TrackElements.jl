@@ -76,8 +76,8 @@ end
 #getRadiiOfNodes("data/ptTracks/example_NodesSetByHandInProVI.PT", "PT", "NodesSetByHandInProVI", trackVisualizationToSVG = true)
 end
 
-nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
-createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
-getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
-getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst", trackVisalizationToSVG = false )
-TrackElements.getRadiiOfNodes("data/osmRelations/relationID_4238488_missing_values.csv", "csv", "4238488_missing_values")
+# nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)
+# createPtFileForOSMNodes(nodesWithUTMCoordinates, "data/osmRelations/relationID_4238488.pt")
+# getRadiiOfNodes("data/osmRelations/relationID_4238488.csv", "CSV", "4238488", radiiToCSV=false, trackVisalizationToSVG = true)
+# getRadiiOfNodes("data/ptTracks/StreckenachseFreihandErfasst(ausProVI).PT", "PT", "StreckenachseFreihandErfasst", trackVisalizationToSVG = false )
+# TrackElements.getRadiiOfNodes("data/osmRelations/relationID_4238488_missing_values.csv", "csv", "4238488_missing_values")

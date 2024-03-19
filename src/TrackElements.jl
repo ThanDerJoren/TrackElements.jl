@@ -41,7 +41,7 @@ function getNodesOfOSMWay(wayID::Int)
     return nodesWithUTMCoordinates
 end 
 
-function getRadiiOfNodes(filePath::String, fileType::String, relationID::String; radiiToCSV=true, trackVisalizationToSVG=false)
+function getRadiiOfNodes(filePath::String, fileType::String, relationID::String; radiiToCSV=true, trackVisualizationToSVG=false)
     ## relationID is a String, so one can give readable names
     accessTime = dateTimeForFilePath(now())
     trackProperties = loadNodes(filePath, fileType)
@@ -66,14 +66,14 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String;
     if radiiToCSV
         exportDataFrameToCSV(trackProperties, "data/trackProperties/TrackProperties_relationID_$(relationID)_$accessTime.csv")
     end
-    if trackVisalizationToSVG
+    if trackVisualizationToSVG
         save("data/trackProperties/TrackVisualization_relationID_$(relationID)_$accessTime.svg", trackVisualization)
     end
     return trackProperties
 end
-#getNodesOfOSMRelation(4238488)
-#getRadiiOfNodes("data/osmRelations/example_relationID_4238488_D2024-03-19T10_50.csv", "csv", "4238488")
-getRadiiOfNodes("data/ptTracks/example_NodesSetByHandInProVI.PT", "PT", "NodesSetByHandInProVI", trackVisalizationToSVG = false)
+getNodesOfOSMRelation(4238488)
+#getRadiiOfNodes("data/osmRelations/example_relationID_4238488_D2024-03-19T10_50.csv", "csv", "4238488", trackVisualizationToSVG = true)
+#getRadiiOfNodes("data/ptTracks/example_NodesSetByHandInProVI.PT", "PT", "NodesSetByHandInProVI", trackVisualizationToSVG = true)
 end
 
 nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)

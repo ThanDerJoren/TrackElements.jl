@@ -71,7 +71,7 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String;
     end
     return trackProperties
 end
-getNodesOfOSMRelation(4238488)
+#getNodesOfOSMRelation(4238488)
 #getRadiiOfNodes("data/osmRelations/example_relationID_4238488_D2024-03-19T10_50.csv", "csv", "4238488", trackVisualizationToSVG = true)
 #getRadiiOfNodes("data/ptTracks/example_NodesSetByHandInProVI.PT", "PT", "NodesSetByHandInProVI", trackVisualizationToSVG = true)
 end

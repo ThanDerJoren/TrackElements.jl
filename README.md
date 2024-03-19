@@ -98,5 +98,84 @@ More details about the calculation of the radii can be found at the functions an
 The z-coordinates are not used for the radii calculation. They are imported for the completeness. That's why its ok to set missed values to zero
 
 # For Developers
+## further developments
+
+### big changes
+
+#### create a Graph
+
+Right now the focus of the programm are the nodes. They map the track layout and the calculated radii are related to a node. It would be nice to treat the Data more as an graph with nodes and edges. This would allow to calculate a radius for each edge and would be closer to the reality.
+
+Currently, the route of the track is represented by the order of the nodes in the dataFrame. There is no view on the edges. They get only created when it comes to the visualization of the track.
+
+#### various UTM Zones
+
+The UTM system divides the Earth into 60 zones, each 6° of longitude in width.
+
+The coordinate system inside of each Zone is the same. That means it is impossible to know in which Zone a coordinate lays, if you don't get the zone number. Thats why you can't just import coordinates out of two zones in one DataFrame and sort them. You have to split them to have an clear allocation to each zone. To split the coordinates you need the allocation to the zone.
+
+Even within one zone a x, y, z combination is not unequivocal. The point could lay in the northern or southern hemisphere, because the equator starts at 0m for the nothern hemisphere and at 10,000,000m for the southern hemisphere. But this is only important if the track crosses the equator.
+
+The Geodesy package converts also the zone and the hemisphere. If you get the OSM data, you can export also the zone and hemisphere (when I tried this, the hemisphere variable was not defied for some reasons).
+
+It must be decided how to include this information into the CSV file, which get imported.
+
+Furthermore it has to be reseached and implemented how to get a radius, distance and so on, at the edge which crosses the two zones. It may be helpful that there are overlapping grids.
+
+#### improve the radius calculation
+
+As you saw at the remarks above, the calculation of the radius isn't that accurate. It would be nice to improve that part of the code. There are two keywords where it is possible to start the research for better algorithms:
+
+1. find curvey roads:
+  
+  > https://roadcurvature.com/how-it-works/ -> this is quite near of my approach
+  > 
+  > [Calculating Road Curvature in R | Spencer Schien](https://spencerschien.info/post/road_directness/)
+  
+2. curve reconstruction
+  
+  > for example with:
+  > 
+  > > a) Reconstruction with constant fitting functions.
+  > > 
+  > > b) Reconstruction with linear fitting functions.
+  > 
+  > Here is some literature which may help you to start your research
+  > 
+  > > [Curve reconstruction from unorganized points](https://doi.org/10.1016/S0167-8396(99)00044-8)
+  > > 
+  > > [Automatic Road Network Reconstruction from GPS Trajectory Data using Curve Reconstruction Algorithms](https://www.researchgate.net/publication/359419835_Automatic_Road_Network_Reconstruction_from_GPS_Trajectory_Data_using_Curve_Reconstruction_Algorithms)
+  > > 
+  > > [Realistic road path reconstruction from GIS data](https://onlinelibrary.wiley.com/doi/10.1111/cgf.12494)
+  
+
+### small changes
+
+A good validation of the nodes is to check how accurate they lay on the actual track. One way to do this is to display the nodes over orthophotos of the track in a GIS program. A possible open source Program is QGis.
+
+These programs can read shapefiles. So it would be nice to convert the nodes into a shapefile to display them in QGis.
+
+If the program is changed to use a graph there are a few things you can change in the visualization of the track. It would be nice to colour the edges depending on the curvature. Furthermore the visualization would get better if the edges aren't straight lines but a curve equivalent to its radius.
+
+## src file structure
+
+**export.jl:** export the data and radii to CSV or PT.
+
+**import.jl:** imort functions for CSV and PT. Function to deal with missing values.
+
+**math.jl:** split in three sections:
+
+1. mathematical basics for following functions
+  
+2. Functions to bring the nodes in the right order
+  
+3. Functions to calculate the radius of each node
+  
+
+**osmAdjustment.jl:** complete logic behind the OSM imports. Inclusive converting coordinates from LLA to UTM
+
+**plot.jl:** visualization of the nodes
+
+**TrackElements.jl:** main functions. Here you start the program
 
 [![Build Status](https://github.com/ThanDerJoren/TrackElements.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/ThanDerJoren/TrackElements.jl/actions/workflows/CI.yml?query=branch%3Amaster)

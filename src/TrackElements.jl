@@ -71,8 +71,9 @@ function getRadiiOfNodes(filePath::String, fileType::String, relationID::String;
     end
     return trackProperties
 end
-getRadiiOfNodes("data/osmRelations/relationID_4238488_without ID.csv", "csv", "4238488_missing_values")
-#getRadiiOfNodes("data/osmRelations/relationID_4238488_without-z.csv", "csv", "4238488_without-z")
+#getNodesOfOSMRelation(4238488)
+#getRadiiOfNodes("data/osmRelations/example_relationID_4238488_D2024-03-19T10_50.csv", "csv", "4238488")
+getRadiiOfNodes("data/ptTracks/example_NodesSetByHandInProVI.PT", "PT", "NodesSetByHandInProVI", trackVisalizationToSVG = false)
 end
 
 nodesWithUTMCoordinates=getNodesOfOSMRelation(4238488)

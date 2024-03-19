@@ -1,1 +1,5 @@
-
+data/osmRelations/relationID*.csv
+data/ptTracks/*.pt
+!data/ptTracks/example_NodesSetByHandInProVI.pt
+data/trackProperties/TrackProperties*.csv
+data/trackProperties/TrackVisualization*.svg
